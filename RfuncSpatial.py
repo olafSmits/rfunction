@@ -25,9 +25,9 @@ TOL = 1 / mpf(10**20)
 
 GLOBAL_TEMP = mpf(5) / mpf(10**3)
 GLOBAL_VOLT = mpf(1) / mpf(10**6)
-VOLTRANGE = fmathify(linspace(0,10,35)) * GLOBAL_VOLT
+VOLTRANGE = fmathify(linspace(0,10,2)) * GLOBAL_VOLT
 EMP= np.array([])
-distance1 = linspace(1,15,30) / mpf(10**7)
+distance1 = linspace(1,15,4) / mpf(10**7)
 distance2 = 15 / mpf(10**7)
 
 example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(5,2),(5,2),(1,3),(1,3)]],
@@ -70,8 +70,6 @@ class base_parameters(object):
         self.genParameters()
         self.genScaledVoltage()
     def genParameters(self):
-        
-        ####### 
         v = self.input_parameters["v"]
         x = self.input_parameters["x"]
         c = self.input_parameters["c"]
@@ -84,8 +82,7 @@ class base_parameters(object):
         # Sort self.g accordingly
         self.parameters = c[:,newaxis] * x / v[:,newaxis]
         m, n = self.parameters.shape
-        self.g = np.transpose(np.vstack([[g]]*n))
-        
+        self.g = np.transpose(np.vstack([[g]]*n))      
         sort_ind = np.argsort(self.parameters, axis = 0)        
         self.parameters = apply_take(self.parameters, sort_ind)
         self.g = apply_take(self.g, sort_ind)
@@ -112,12 +109,17 @@ class base_parameters(object):
                     new_line = np.delete(new_line,j+1)
                     new_g_line[j] += new_g_line[j+1]
                     new_g_line = np.delete(new_g_line, j+1)
+                    
+            # compute exponentiated parameters, z_i = exp(x_i/v_i)
             new_line = fexp(fac*new_line)
             maxP, argm = np.max(new_line), np.argmax(new_line)
+            
+            #remove largest parameter, z_max
             maxParameter.append(maxP)
             new_line = np.delete(new_line, argm)
             new_g_line = np.delete(new_g_line, argm)
             
+            # final parameters: 1- z_i/z_max
             new_line = 1- new_line / maxP
             
             new_parameters.append(new_line)
@@ -129,33 +131,22 @@ class base_parameters(object):
         # Note: self.parameters and self.g has as alements: arrays
         # for each value of inputparameters a possible reduction can take place.
 
-
-        # Now we create the physical values
-
-
-#        self.not_select = np.insert(diff, 0, mpf(1)) < TOL
-#        self.select_ind = np.append(diff, mpf(1)) > TOL
-#        self.parameters = self.parameters[sort_ind]
-#        self.s = select_ind
-#        g = g[sort_ind] + g[sort_ind] * not_select[:,newaxis]
-#        self.g = g[select_ind]
-#        
-        #self.parameters = self.parameters[sort_ind][select_ind]
-        #g = g[sort_ind][select_ind]
-        #self.g = g
-
     def genScaledVoltage(self):
         self.scaledVolt = fmpc(self.gtot, 
                                -self.Q*ELEC*self.V/(2*pi*BLTZMN*self.T) )
 
-def Rfunc_constructor(A):
-    return Rfunc_spatial_series(parameters = A.parameters, g = A.g, gtot = A.gtot,
+def Rfunc_constructor(A, method = 'series'):
+    if method == 'series':
+        constr = Rfunc_spatial_series
+    elif method =='cnct':
+        constr = Rfunc_spatial_CNCT
+    return constr(parameters = A.parameters, g = A.g, gtot = A.gtot,
                                 maxParameter = A.maxParameter, prefac = A.prefac,
                                 T = A.T, V = A.V, scaledVolt = A.scaledVolt)
 
 class Rfunc_spatial_series(object):
     T = GLOBAL_TEMP
-    nterms = 100
+    nterms = 50
     parameters = EMP[:,newaxis]
     g = EMP[:,newaxis]
     V = EMP[newaxis,:]
@@ -197,7 +188,6 @@ class Rfunc_spatial_series(object):
             self.parameters = self.parameters[:, newaxis]
         self.prefac = self.prefac * np.power(self.maxParameter, 
                                   -self.scaledVolt[...,newaxis])
-        self.genAnswer()
     def genLDA(self):
         self.power = np.power(self.parameters[...,newaxis], 
                          np.arange(1,self.nterms)[newaxis,newaxis,:])
@@ -224,8 +214,36 @@ class Rfunc_spatial_series(object):
         self.rfunction = self.prefac * self.lauricella
         self.rrfunction = freal(self.rfunction)
 
+class Rfunc_spatial_CNCT(Rfunc_spatial_series):
+    maxA = 9
+    maxK = 7
+    def genWijngaardenTerms(self):  
+        if 2**2*(self.maxA+1) - 1 >= self.nterms:
+            print """
+Warning: self.maxA is relatively low. Lack of accuracy may occur.
+Advice: increase nterms or lower maxA"""
+                    
+        self.wijngaardenArray = \
+            np.fromfunction(lambda  j, k: 2**k*(j+1) -1,(self.maxA, self.maxK)
+                            ,dtype = np.int64)
+        self.wijngaardenArray[self.wijngaardenArray >= self.nterms] = -1
+        self.wijnTerms = np.unique(self.wijngaardenArray)
+        if -1 in self.wijnTerms:
+            self.wijnTerms = np.delete(self.wijnTerms,0)
+    def extractWijngaardenFromLDA(self):
+        if not hasattr(A, 'lda') or len(self.lda) != self.nterms:
+            self.genLDA()
+        ldaDICT = dict((n, self.lda[n])  for n in self.wijnTerms)
+        ldaDICT[-1] = mpf(0)
+        def _f(n): return ldaDICT[n]
+        _g = np.vectorize(_f)
+        self.ldaWijn = _g(self.wijngaardenArray)
+    def genGamma(self):
+        pass
+    def mergeLDAandGamma(self):
+        pass
 
 a = base_parameters(example1, V = VOLTRANGE)
-A = Rfunc_constructor(a)
+A = Rfunc_constructor(a, method = 'cnct')
 b = base_parameters(example2, V= GLOBAL_VOLT)
 B = Rfunc_constructor(b)
