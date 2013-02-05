@@ -24,7 +24,7 @@ fexp = vectorize(exp)
 pi = mpf(mp.pi)
 VOLTRANGE = fmathify(linspace(0,10,3)) * GLOBAL_VOLT
 
-distance1 = linspace(1,10,20) / mpf(10**7)
+distance1 = linspace(1,10,5) / mpf(10**7)
 distance2 = 15 / mpf(10**7)
 
 example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
@@ -43,9 +43,9 @@ def Rfunc_constructor(A, method = 'series'):
         constr = Rfunc_spatial_series
     elif method =='cnct':
         constr = Rfunc_spatial_CNCT
-    return constr(parameters = A.parameters, g = A.g, gtot = A.gtot,
+    return constr(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
                                 maxParameter = A.maxParameter, prefac = A.prefac,
-                                T = A.T, V = A.V, scaledVolt = A.scaledVolt,
+                                V = A.V, scaledVolt = A.scaledVolt,
                                 distance = A.input_parameters["x"][0])
 
 class Rfunc_spatial_series(object):
@@ -104,9 +104,11 @@ class Rfunc_spatial_series(object):
         self.lda = fmathify(self.lda)
         self.ts = np.transpose(self.ts)
         for m in xrange(1,self.nterms):
-            self.lda[m,:] = np.sum(self.lda[:m,:][::-1] * self.ts[:m,:], axis=0)/mpf(m)
+            self.lda[m,:] = np.sum(self.lda[:m,:][::-1] *\
+                                        self.ts[:m,:], axis=0)/mpf(m)
     def genGamma(self):
-        self.gamma = np.arange(0, self.nterms)[:, newaxis] + self.scaledVolt[newaxis,:]
+        self.gamma = np.arange(0, self.nterms)[:, newaxis] + \
+                                    self.scaledVolt[newaxis,:]
         self.gamma = fgamma(self.gamma) / fgamma(self.scaledVolt)
         div = fgamma(self.gtot + np.arange(0, self.nterms)) / fgamma(self.gtot)
         self.gamma = self.gamma / div[:,newaxis]
@@ -139,8 +141,6 @@ Advice: increase nterms or lower maxA"""
     def extractWijngaardenFromLDA(self):
         if not hasattr(self, 'lda') or len(self.lda) != self.nterms:
             self.genLDA()
-        ldaDICT = dict((n, self.lda[n])  for n in self.wijnTerms)
-        ldaDICT[-1] = mpf(0)
         def _f(i, j):
             ldaDICT = dict((k, self.lda[k][j])  for k in self.wijnTerms)
             ldaDICT[-1] = mpf(0)
@@ -148,24 +148,49 @@ Advice: increase nterms or lower maxA"""
                 return ldaDICT[n]
             _g = np.vectorize(g)
             return _g(i)
-        n,m = self.wijngaardenArray.shape
-        self.ldaWijn = np.ones((n, m, self.lda.shape[1]), dtype = object)
+        ldaTemp = np.ones((self.maxA, self.maxK, self.lda.shape[1]), 
+                          dtype = object)
         for i in range(self.lda.shape[1]):
-            self.ldaWijn[:,:,i] = _f(self.wijngaardenArray, i)
-        wijngaardenFactor = (2**np.arange(0, B.maxK))
+            ldaTemp[:,:,i] = _f(self.wijngaardenArray, i)
+        self.lda = ldaTemp
+        wijngaardenFactor = np.power(-1,np.arange(0, self.maxA))[:,newaxis]* \
+                                (2**np.arange(0, self.maxK))
+        self.lda = self.lda*wijngaardenFactor[:,:,newaxis]
     def genGamma(self):
-        pass
+        if not hasattr(self, 'wijnTerms'):
+            self.genWijngaardenTerms()
+        gDict = dict((k, fgamma(self.gtot + mpf(str(k)))/fgamma(self.gtot)) \
+            for k in self.wijnTerms)
+        self.gDict = gDict
+        def f(i, j):
+            fg = fgamma(self.scaledVolt[j])
+            gamDict = dict((k, fgamma(self.scaledVolt[j] + mpf(str(k)))/ (fg*gDict[k])) \
+                for k in self.wijnTerms)
+            gamDict[-1] = mpf('0')
+            def g(n):
+                return gamDict[n]
+            _g = vectorize(g)
+            return _g(i)
+        self.gamma = fmathify(np.ones((self.maxA,self.maxK,self.scaledVolt.size)))
+        for j in xrange(self.scaledVolt.size):
+            self.gamma[:,:,j] = f(self.wijngaardenArray, j)
     def mergeLDAandGamma(self):
-        pass
+        self.extractWijngaardenFromLDA()
+        self.lauricella =np.sum(self.lda[...,newaxis] * self.gamma[:,:,newaxis,:],
+                                axis = 1)
+        
     def test(self):
         #self.genLDA()
         self.genWijngaardenTerms()
         self.extractWijngaardenFromLDA()
+        
+
 a = BP.base_parameters(example1, V = GLOBAL_VOLT )
-A = Rfunc_constructor(a, method = 'series')
+A = Rfunc_constructor(a, method = 'cnct')
 b = BP.base_parameters(example2, V= VOLTRANGE)
 B = Rfunc_constructor(b, method = 'cnct')
-
+A.test()
+B.test()
 
 def plot_surface(A):
     if not hasattr(A, 'rrfunction'):
