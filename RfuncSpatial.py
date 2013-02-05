@@ -2,6 +2,7 @@
 """
 Created on Mon Feb 04 08:43:43 2013
 """
+from __future__ import division
 import time
 import numpy as np
 import sympy.mpmath as mp
@@ -9,20 +10,20 @@ import matplotlib.pylab as plt
 import InputParameters as BP
 from mpl_toolkits.mplot3d import Axes3D
 
-from numpy import newaxis, vectorize, linspace
+from numpy import newaxis, vectorize, linspace, power, arange
 from sympy.mpmath import mpf, almosteq, exp
 from InputParameters import GLOBAL_VOLT, GLOBAL_TEMP, EMP
 
 mp.mp.pretty = True
 mp.mp.dps = 20
 
-fmathify = vectorize(mp.mpmathify)
+fmfy = vectorize(mp.mpmathify)
 fgamma = vectorize(mp.gamma)
 freal = vectorize(mp.re)
 fexp = vectorize(exp)
 
 pi = mpf(mp.pi)
-VOLTRANGE = fmathify(linspace(0,10,3)) * GLOBAL_VOLT
+VOLTRANGE = fmfy(linspace(0,10,3)) * GLOBAL_VOLT
 
 distance1 = linspace(1,10,5) / mpf(10**7)
 distance2 = 15 / mpf(10**7)
@@ -32,7 +33,7 @@ example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
             "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
             "x":[distance1, -distance1*1.1, distance1, -distance1*1.1]}
 
-example2 = { "v":[mpf(i)*mpf(10**j) for (i,j) in [(5,3),(5,3),(5,4),(5,4)]],
+example2 = { "v":[mpf(i)*mpf(10**j) for (i,j) in [(5,3),(5,3),(5,3),(5,3)]],
             "c":[1,1,1,1],
             "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
             "x":[distance2, -distance2, distance2, -distance2]}
@@ -101,7 +102,7 @@ class Rfunc_spatial_series(object):
                         np.power(self.parameters[...,newaxis], 
                          np.arange(1,self.nterms)[newaxis,newaxis,:]),axis = 1)
         self.lda = np.ones((self.nterms, self.parameters.shape[0]))
-        self.lda = fmathify(self.lda)
+        self.lda = fmfy(self.lda)
         self.ts = np.transpose(self.ts)
         for m in xrange(1,self.nterms):
             self.lda[m,:] = np.sum(self.lda[:m,:][::-1] *\
@@ -156,42 +157,62 @@ Advice: increase nterms or lower maxA"""
         wijngaardenFactor = np.power(-1,np.arange(0, self.maxA))[:,newaxis]* \
                                 (2**np.arange(0, self.maxK))
         self.lda = self.lda*wijngaardenFactor[:,:,newaxis]
+        
     def genGamma(self):
         if not hasattr(self, 'wijnTerms'):
             self.genWijngaardenTerms()
         gDict = dict((k, fgamma(self.gtot + mpf(str(k)))/fgamma(self.gtot)) \
-            for k in self.wijnTerms)
-        self.gDict = gDict
+                        for k in self.wijnTerms)
         def f(i, j):
             fg = fgamma(self.scaledVolt[j])
-            gamDict = dict((k, fgamma(self.scaledVolt[j] + mpf(str(k)))/ (fg*gDict[k])) \
-                for k in self.wijnTerms)
+            gamDict = dict((k, fgamma(self.scaledVolt[j] + mpf(str(k))) / \
+                                (fg*gDict[k])) for k in self.wijnTerms)
             gamDict[-1] = mpf('0')
             def g(n):
                 return gamDict[n]
             _g = vectorize(g)
             return _g(i)
-        self.gamma = fmathify(np.ones((self.maxA,self.maxK,self.scaledVolt.size)))
+
+        self.gamma = fmfy(np.ones((self.maxA, self.maxK, self.scaledVolt.size)))
         for j in xrange(self.scaledVolt.size):
             self.gamma[:,:,j] = f(self.wijngaardenArray, j)
+            
     def mergeLDAandGamma(self):
         self.extractWijngaardenFromLDA()
-        self.lauricella =np.sum(self.lda[...,newaxis] * self.gamma[:,:,newaxis,:],
-                                axis = 1)
-        
-    def test(self):
-        #self.genLDA()
-        self.genWijngaardenTerms()
-        self.extractWijngaardenFromLDA()
-        
+        self.lauricella_terms =np.sum(self.lda[:,:,newaxis,:]*
+                                        self.gamma[...,newaxis], axis = 1)   
+        self.lauricella = self.lauricella_terms
 
-a = BP.base_parameters(example1, V = GLOBAL_VOLT )
+def levin_acceleration(L, beta = 1.):
+    def LB(n, k):
+        return (beta + n + k)*power(beta + n + k, k-1)/power(beta+n+k+1,k)
+    def SB(n,k):
+        return (beta+n+k)*(beta+n+k-1)/((beta+n+2*k)*beta+n+2*k-1)
+    
+    ### remainder estimator
+    rem = L[1:]
+    #rem = L[:-1]
+    #rem = L[1:]*L[:-1]  (L[1:] - L[:-1])
+    ###
+    numerator = recursive_generator(1/rem, LB)
+    denominator = recursive_generator(L.cumsum(axis=0)[:-1]/rem, LB)
+    
+    return numerator / denominator
+    
+def recursive_generator(L, f):
+    for i in range(1,L.shape[0]):
+        L[:-1] = L[1:] - f(arange(0,L.shape[0]-1), i)[:,newaxis,newaxis]* L[:-1]
+        L = np.delete(L, -1, 0) 
+    return L
+
+
+a = BP.base_parameters(example1, V = VOLTRANGE )
 A = Rfunc_constructor(a, method = 'cnct')
-b = BP.base_parameters(example2, V= VOLTRANGE)
+b = BP.base_parameters(example2, V= GLOBAL_VOLT)
 B = Rfunc_constructor(b, method = 'cnct')
-A.test()
-B.test()
-
+A.genAnswer()
+B.genAnswer()
+levin_acceleration(A.lauricella)
 def plot_surface(A):
     if not hasattr(A, 'rrfunction'):
         A.genAnswer()
