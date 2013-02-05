@@ -23,9 +23,9 @@ freal = vectorize(mp.re)
 fexp = vectorize(exp)
 
 pi = mpf(mp.pi)
-VOLTRANGE = fmfy(linspace(0,10,3)) * GLOBAL_VOLT
+VOLTRANGE = fmfy(linspace(0,20,50)) * GLOBAL_VOLT
 
-distance1 = linspace(1,10,5) / mpf(10**7)
+distance1 = linspace(1,20,50) / mpf(10**7)
 distance2 = 15 / mpf(10**7)
 
 example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
@@ -51,7 +51,7 @@ def Rfunc_constructor(A, method = 'series'):
 
 class Rfunc_spatial_series(object):
     T = GLOBAL_TEMP
-    nterms = 50
+    nterms = 250
     parameters = EMP[:,newaxis]
     g = EMP[:,newaxis]
     V = EMP[newaxis,:]
@@ -124,8 +124,8 @@ class Rfunc_spatial_series(object):
         self.rrfunction = freal(self.rfunction)
 
 class Rfunc_spatial_CNCT(Rfunc_spatial_series):
-    maxA = 9
-    maxK = 7
+    maxA = 10
+    maxK = 9
     def genWijngaardenTerms(self):  
         if 2**2*(self.maxA+1) - 1 >= self.nterms:
             print """
@@ -181,7 +181,7 @@ Advice: increase nterms or lower maxA"""
         self.extractWijngaardenFromLDA()
         self.lauricella_terms =np.sum(self.lda[:,:,newaxis,:]*
                                         self.gamma[...,newaxis], axis = 1)   
-        self.lauricella = self.lauricella_terms
+        self.lauricella = levin_acceleration(self.lauricella_terms)
 
 def levin_acceleration(L, beta = 1.):
     def LB(n, k):
@@ -194,10 +194,10 @@ def levin_acceleration(L, beta = 1.):
     #rem = L[:-1]
     #rem = L[1:]*L[:-1]  (L[1:] - L[:-1])
     ###
-    numerator = recursive_generator(1/rem, LB)
-    denominator = recursive_generator(L.cumsum(axis=0)[:-1]/rem, LB)
+    denominator = recursive_generator(1/rem, LB)
+    numerator = recursive_generator(L.cumsum(axis=0)[:-1]/rem, LB)
     
-    return numerator / denominator
+    return (numerator / denominator)[0]
     
 def recursive_generator(L, f):
     for i in range(1,L.shape[0]):
@@ -205,14 +205,12 @@ def recursive_generator(L, f):
         L = np.delete(L, -1, 0) 
     return L
 
-
 a = BP.base_parameters(example1, V = VOLTRANGE )
 A = Rfunc_constructor(a, method = 'cnct')
 b = BP.base_parameters(example2, V= GLOBAL_VOLT)
 B = Rfunc_constructor(b, method = 'cnct')
 A.genAnswer()
 B.genAnswer()
-levin_acceleration(A.lauricella)
 def plot_surface(A):
     if not hasattr(A, 'rrfunction'):
         A.genAnswer()
