@@ -8,6 +8,7 @@ import numpy as np
 import sympy.mpmath as mp
 import matplotlib.pylab as plt
 import InputParameters as BP
+import cProfile
 from mpl_toolkits.mplot3d import Axes3D
 
 from numpy import newaxis, vectorize, linspace, power, arange
@@ -201,15 +202,20 @@ def levin_acceleration(L, beta = 1.):
     
 def recursive_generator(L, f):
     for i in range(1,L.shape[0]):
-        L[:-1] = L[1:] - f(arange(0,L.shape[0]-1), i)[:,newaxis,newaxis]* L[:-1]
-        L = np.delete(L, -1, 0) 
-    return L
+        L[:-1] = L[1:] - f(fmfy(arange(0,L.shape[0]-1)), i)[:,newaxis,newaxis]* L[:-1]
+        L = np.delete(L,-1, axis = 0)
+    return L[0,:,:]
 
 a = BP.base_parameters(example1, V = VOLTRANGE )
 A = Rfunc_constructor(a, method = 'cnct')
 b = BP.base_parameters(example2, V= GLOBAL_VOLT)
 B = Rfunc_constructor(b, method = 'cnct')
-A.genAnswer()
+cProfile.runctx(
+            'A.genAnswer()',
+            globals(),
+            locals()
+        )
+
 B.genAnswer()
 def plot_surface(A):
     if not hasattr(A, 'rrfunction'):
