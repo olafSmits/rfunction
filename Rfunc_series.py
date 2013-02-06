@@ -20,7 +20,7 @@ fexp = vectorize(mp.exp)
 
 pi = mpf(mp.pi)
 
-class Rfunc_spatial_series(object):
+class Rfunc_series(object):
     T = GLOBAL_TEMP
     nterms = 250
     parameters = EMP[:,newaxis]
@@ -93,7 +93,7 @@ class Rfunc_spatial_series(object):
         
         self.genLDA()
         self.genGamma()
-#        self.mergeLDAandGamma()
-        cProfile.runctx('self.mergeLDAandGamma()', globals(), locals() )
+        self.mergeLDAandGamma()
+        #cProfile.runctx('self.mergeLDAandGamma()', globals(), locals() )
         self.rfunction = self.prefac * self.lauricella
         self.rrfunction = freal(self.rfunction)

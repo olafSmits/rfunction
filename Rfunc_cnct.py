@@ -24,7 +24,7 @@ pi = mpf(mp.pi)
 
 
 
-class Rfunc_spatial_CNCT(Rfunc.Rfunc_spatial_series):
+class Rfunc_CNCT(Rfunc.Rfunc_series):
     maxA = 10
     maxK = 9
     def genWijngaardenTerms(self):  

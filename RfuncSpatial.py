@@ -7,8 +7,8 @@ import numpy as np
 import sympy.mpmath as mp
 import matplotlib.pylab as plt
 import InputParameters as BP
-from Rfunc_series import Rfunc_spatial_series as Rseries
-from Rfunc_cnct import Rfunc_spatial_CNCT as Rcnct
+from Rfunc_series import Rfunc_series as Rseries
+from Rfunc_cnct import Rfunc_CNCT as Rcnct
 from mpl_toolkits.mplot3d import Axes3D
 
 from numpy import vectorize, linspace
@@ -24,7 +24,7 @@ freal = vectorize(mp.re)
 pi = mpf(mp.pi)
 VOLTRANGE = fmfy(linspace(0,20,25)) * GLOBAL_VOLT
 
-distance1 = linspace(1,20,25) / mpf(10**7)
+distance1 = linspace(1,20,3) / mpf(10**7)
 distance2 = 15 / mpf(10**7)
 
 example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
