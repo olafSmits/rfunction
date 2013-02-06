@@ -82,7 +82,6 @@ Advice: increase nterms or lower maxA"""
         self.extractWijngaardenFromLDA()
         self.lauricella_terms =np.sum(self.lda[:,:,newaxis,:]*
                                         self.gamma[...,newaxis], axis = 1)  
-        self.lauricella_terms = np.complex128(self.lauricella_terms)
         self.lauricella = levin_acceleration(self.lauricella_terms)
 
 def levin_acceleration(L, beta = 1.):
