@@ -89,9 +89,9 @@ if __name__ == '__main__':
     distance = np.linspace(.5, 1.0, 3) * basedist
     distance2 = np.ones_like(distance) * basedist
     example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3)]],
-              "c":[1,1],
-            "g":[1/mpf(8),1/mpf(8)],
-                 "x":[distance, -distance]}
+                "c":[1,1],
+                "g":[1/mpf(8),1/mpf(8)],
+                "x":[distance, -distance]}
     A = BP.base_parameters(example1, V =VOLTRANGE)
     B = Rfunc_constructor(A, 'fortran')
     B.setParameter(nterms = 800, maxA = 8, maxK = 10)

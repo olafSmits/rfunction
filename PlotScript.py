@@ -263,11 +263,11 @@ def particles_7_3(saving = False):
     genData = { 
         "v":[mpf(i) * mpf(10**j) for (i,j) in [(9,3),(9,3),(2,3),(2,3)]],
          "x":[dist1, -dist2, dist1, -dist2]}
-#    LaughlinE3 = {
-#        "g":[mpf(1)/mpf(2)],
-#        "c":[1,1],
-#        "x":[dist1, -dist2],
-#        "v":[mpf(i) * mpf(10**j) for (i,j) in [(9,3),(9,3)]],"Q":1/mpf(3)}
+    LaughlinE3 = {
+        "g":[mpf(1)/mpf(2),mpf(1)/mpf(2)],
+        "c":[1,1],
+        "x":[dist1, -dist2],
+        "v":[mpf(i) * mpf(10**j) for (i,j) in [(9,3),(9,3)]],"Q":1/mpf(3)}
     aBS23 = {
         "g":[mpf(1)/mpf(3), mpf(1)/mpf(3),mpf(5)/mpf(8), mpf(5)/mpf(8)], 
         "c":[1,1,1,1],"Q":1/mpf(3)}
@@ -279,13 +279,20 @@ def particles_7_3(saving = False):
         "c":[1,1,1,1],"Q":1/mpf(6)}
 
 
-    particleset = [aBS23, BS13, aRR4]#, LaughlinE3]
+    particleset = [aBS23, BS13, aRR4, LaughlinE3]
     names =[    r"$\overline{\mathrm{BS}}_{2/3}$ (e/3)",
                 r"$\mathrm{BS}_{1/3}^{\psi}$ (e/3)",
-                r"$\overline{\mathrm{RR}}_{k=4} $ (e/6)"]#,
-#                r"Laughlin (e/3)"]
-
-
+                r"$\overline{\mathrm{RR}}_{k=4} $ (e/6)",
+                r"Laughlin (e/3)"]
+#    particle = genData.copy()
+#    particle.update(LaughlinE3)
+#    Qe = particle["Q"]
+#    del particle["Q"]
+#    A = base_parameters(particle, V = Vpoints, Q = Qe, T = 1/mpf(10**4))
+#    B = Rfunc_constructor(A, method = 'series')
+#    B.setParameter(nterms = 900, maxA = 12, maxK = 12)
+#    B.genAnswer()  
+#    return
     mp.mp.dps= 60    
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -298,7 +305,7 @@ def particles_7_3(saving = False):
         A = base_parameters(particle, V = Vpoints, Q = Qe, T = 1/mpf(10**4))
         ans.append(A)
         B = Rfunc_constructor(A, method = 'series')
-        B.setParameter(nterms = 900, maxA = 12, maxK = 12)
+        B.setParameter(nterms = 1000, maxA = 12, maxK = 12)
         B.genAnswer()
         ax.plot(Vpoints, B.rrfunction, label = names[i], linewidth=1.5) 
         

@@ -30,6 +30,7 @@ class base_parameters(object):
     Q =  1/mpf(4)
     input_parameters = { "v":EMP,"c":EMP,"g":EMP,"x":EMP}
     def __init__(self, input_parameters, V = None, Q = None, T = None):
+
 ########## Process input
         for i, j in input_parameters.items():
             if isinstance(j, np.ndarray):         
@@ -58,7 +59,6 @@ class base_parameters(object):
         x = self.input_parameters["x"]
         c = self.input_parameters["c"]
         g = self.input_parameters["g"]
-
         def apply_take(a, s):
             m, n = a.shape
             return np.transpose(np.take(np.transpose(a), s + np.mgrid[0:m,0:n][1] *m ))
@@ -67,7 +67,7 @@ class base_parameters(object):
         self.parameters = c[:,newaxis] * x / v[:,newaxis]
         m, n = self.parameters.shape
         self.g = np.transpose(np.vstack([[g]]*n))      
-        sort_ind = np.argsort(self.parameters, axis = 0)        
+        sort_ind = np.argsort(self.parameters, axis = 0)       
         self.parameters = apply_take(self.parameters, sort_ind)
         self.g = apply_take(self.g, sort_ind)
 
