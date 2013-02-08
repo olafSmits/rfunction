@@ -18,6 +18,7 @@ do i = 1, nterms - 1
 lda(i, j) = DOT_PRODUCT(lda(i-1:0:-1, j),ts(1:i, j)) / REAL(i,kind = k2)
 if (lda(i, j) < tinynumber) then
 write(*,*) 'Smallest precision reached'
+lda(i:nterms-1, j) = 0.
 exit
 end if
 end do

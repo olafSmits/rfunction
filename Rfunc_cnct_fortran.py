@@ -7,9 +7,8 @@ import Rfunc_cnct as Rcnct
 import numpy as np
 import sympy.mpmath as mp
 from cnct import cnct as cnct
-
-
-from numpy import newaxis, vectorize, power, arange
+import matplotlib.pylab as plt
+from numpy import newaxis, vectorize
 from sympy.mpmath import mpf
 
 mp.mp.pretty = True
@@ -50,9 +49,9 @@ class Rfunc_fortran(Rcnct.Rfunc_CNCT):
         
 if __name__ == '__main__':
     import InputParameters as BP
-    VOLTRANGE = fmfy(np.linspace(0,100,50)) * BP.GLOBAL_VOLT
+    VOLTRANGE = fmfy(np.linspace(0,50,3)) * BP.GLOBAL_VOLT
     basedist = mpf(1.0)/mpf(10**6)
-    distance = np.arange(0,3) * basedist
+    distance = np.linspace(.5, 1.0, 3) * basedist
     distance2 = np.ones_like(distance) * basedist
     example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
               "c":[1,1,1,1],
@@ -62,5 +61,9 @@ if __name__ == '__main__':
     B = Rfunc_fortran(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
                                 maxParameter = A.maxParameter, prefac = A.prefac,
                                 V = A.V, scaledVolt = A.scaledVolt,
-                                distance = A.input_parameters["x"][0])
-    B.setParameter(nterms = 10000, maxA = 15, maxK = 15)
+                                distance = A.input_parameters["x"][0], Vq = A.Vq)
+    B.setParameter(nterms = 800, maxA = 8, maxK = 10)
+    B.genAnswer()
+    plt.figure()
+    plt.plot(B.rrfunction)
+    plt.show()

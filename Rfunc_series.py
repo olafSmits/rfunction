@@ -6,8 +6,7 @@ Created on Wed Feb 06 17:12:47 2013
 from __future__ import division
 import numpy as np
 import sympy.mpmath as mp
-import cProfile
-
+import matplotlib.pylab as plt
 from numpy import newaxis, vectorize
 from sympy.mpmath import mpf
 from InputParameters import GLOBAL_TEMP, EMP
@@ -30,9 +29,11 @@ class Rfunc_series(object):
     maxParameter = EMP
     prefac = EMP
     gtot = EMP
-    def __init__(self, parameters = None, maxParameter = None, distance = None,
-                 g = None, V = None, prefac = None, gtot = None,
-                 scaledVolt = None, T= None):
+    def __init__(self, parameters, maxParameter, distance,
+                 g, V, prefac, gtot,
+                 scaledVolt, T, Vq):
+        if Vq is not None:
+            self.Vq = Vq
         if distance is not None:
             self.distance = distance
         if parameters is not None:
@@ -66,7 +67,7 @@ class Rfunc_series(object):
             self.parameters = self.parameters[:, newaxis]
         self.prefac = self.prefac * np.power(self.maxParameter, 
                                   -self.scaledVolt[...,newaxis])
-    def setParameter(self, nterms):
+    def setParameter(self, nterms, **arg):
         self.nterms = nterms
     def genLDA(self):
         self.power = np.power(self.parameters[...,newaxis], 
@@ -99,3 +100,24 @@ class Rfunc_series(object):
         #cProfile.runctx('self.mergeLDAandGamma()', globals(), locals() )
         self.rfunction = self.prefac * self.lauricella
         self.rrfunction = freal(self.rfunction)
+        
+if __name__ == '__main__':
+    import InputParameters as BP
+    VOLTRANGE = fmfy(np.linspace(0,50,3)) * BP.GLOBAL_VOLT
+    basedist = mpf(1.0)/mpf(10**6)
+    distance = np.linspace(.5, 1.0, 3) * basedist
+    distance2 = np.ones_like(distance) * basedist
+    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
+              "c":[1,1,1,1],
+            "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
+                 "x":[distance2, -distance, distance2, -distance]}
+    A = BP.base_parameters(example1, V =VOLTRANGE)
+    B = Rfunc_series(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
+                                maxParameter = A.maxParameter, prefac = A.prefac,
+                                V = A.V, scaledVolt = A.scaledVolt,
+                                distance = A.input_parameters["x"][0], Vq = A.Vq)
+    B.setParameter(nterms = 800)
+    B.genAnswer()
+    plt.figure()
+    plt.plot(B.rrfunction)
+    plt.show()

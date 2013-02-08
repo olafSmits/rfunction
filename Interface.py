@@ -11,19 +11,18 @@ import matplotlib.pylab as plt
 import InputParameters as BP
 from Rfunc_series import Rfunc_series as Rseries
 from Rfunc_cnct import Rfunc_CNCT as Rcnct
-
+from Rfunc_cnct_fortran import Rfunc_fortran as Rfortran
 
 from mpl_toolkits.mplot3d import Axes3D
+from numpy import vectorize, linspace, newaxis
+from sympy.mpmath import mpf
 
-from numpy import vectorize, linspace
-from sympy.mpmath import mpf, beta
-from InputParameters import GLOBAL_VOLT, GLOBAL_TEMP
 
 mp.mp.pretty = True
 mp.mp.dps = 20
 
-fbeta = vectorize(beta)
-fsinh = vectorize(sinh)
+fbeta = vectorize(mp.beta)
+fsinh = vectorize(mp.sinh)
 fmfy = vectorize(mp.mpmathify)
 freal = vectorize(mp.re)
 
@@ -36,10 +35,14 @@ def Rfunc_constructor(A, method = 'series'):
         constr = Rseries
     elif method =='cnct':
         constr = Rcnct
+    elif method == 'fortran':
+        constr = Rfortran
+    else:
+        raise ValueError
     return constr(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
                                 maxParameter = A.maxParameter, prefac = A.prefac,
                                 V = A.V, scaledVolt = A.scaledVolt,
-                                distance = A.input_parameters["x"][0])
+                                distance = A.input_parameters["x"][0], Vq = A.Vq)
 
 
 def Current(rfunc):
@@ -49,12 +52,14 @@ def Current(rfunc):
     """
     gtot = rfunc.gtot
     Vscaled = rfunc.scaledVolt
-    Vq = rfunc.Q*BP.ELEC*rfunc.V/(2*BP.BLTZMN*rfunc.T) 
+    Vq = rfunc.Vq
     
-    single = fsinh(Vq) * fbeta(Vscaled, gtot - Vscaled)
-    if not hasattr(rfunc, rrfunction):
+    single = fsinh(Vq * pi) * fbeta(Vscaled, gtot - Vscaled)
+    if not hasattr(rfunc, 'rrfunction'):
         rfunc.genAnswer()
     interference = (1+2*rfunc.rrfunction) * single[:,newaxis]
+    single = freal(single)
+    interference = freal(interference)
     return single, interference
 
 def plot_surface(A):
@@ -76,26 +81,19 @@ def plot_surface(A):
     plt.show()
     
 if __name__ == '__main__':
-    VOLTRANGE = fmfy(linspace(0,20,25)) * GLOBAL_VOLT
-    
-    distance1 = linspace(1,20,3) / mpf(10**7)
-    distance2 = 15 / mpf(10**7)
-
+    VOLTRANGE = fmfy(np.linspace(0,50,3)) * BP.GLOBAL_VOLT
+    basedist = mpf(1.0)/mpf(10**6)
+    distance = np.linspace(.5, 1.0, 3) * basedist
+    distance2 = np.ones_like(distance) * basedist
     example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
-            "c":[1,1,1,1],
+              "c":[1,1,1,1],
             "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
-            "x":[distance1, -distance1*1.1, distance1, -distance1*1.1]}
-
-    example2 = { "v":[mpf(i)*mpf(10**j) for (i,j) in [(5,3),(5,3),(5,3),(5,3)]],
-            "c":[1,1,1,1],
-            "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
-            "x":[distance2, -distance2, distance2, -distance2]}
-        
-
-a = BP.base_parameters(example1, V = VOLTRANGE )
-    A = Rfunc_constructor(a, method = 'cnct')
-    b = BP.base_parameters(example2, V= GLOBAL_VOLT)
-    B = Rfunc_constructor(b, method = 'cnct')
-    A.genAnswer()
-    #cProfile.runctx('A.genAnswer()', globals(), locals() )
+                 "x":[distance2, -distance, distance2, -distance]}
+    A = BP.base_parameters(example1, V =VOLTRANGE)
+    B = Rfunc_constructor(A, 'fortran')
+    B.setParameter(nterms = 800, maxA = 8, maxK = 10)
     B.genAnswer()
+    single, interference = Current(B)
+#    plt.figure()
+#    plt.plot(B.rrfunction)
+#    plt.show()

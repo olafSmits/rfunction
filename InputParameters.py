@@ -116,5 +116,6 @@ class base_parameters(object):
         # for each value of inputparameters a possible reduction can take place.
 
     def genScaledVoltage(self):
-        self.scaledVolt = fmpc(self.gtot /mpf(2), 
-                               -self.Q*ELEC*self.V/(2*pi*BLTZMN*self.T) )
+        self.Vq = self.Q*ELEC*self.V/(2*pi*BLTZMN*self.T)        
+        self.scaledVolt = fmpc(self.gtot /mpf(2), - self.Vq )
+        

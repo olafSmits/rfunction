@@ -7,7 +7,7 @@ from __future__ import division
 import numpy as np
 import sympy.mpmath as mp
 import Rfunc_series as Rfunc
-
+import matplotlib.pylab as plt
 from numpy import newaxis, vectorize, power, arange
 from sympy.mpmath import mpf
 
@@ -67,7 +67,8 @@ Advice: increase nterms or lower maxA"""
         self.lda = self.lda*wijngaardenFactor[:,:,newaxis]
         
     def genGamma(self):
-        if not hasattr(self, 'wijnTerms'):
+        if not hasattr(self, 'wijnTerms') \
+            or self.wijngaardenArray.shape != (self.maxA, self.maxK):
             self.genWijngaardenTerms()
         gDict = dict((k, fgamma(self.gtot + mpf(str(k)))/fgamma(self.gtot)) \
                         for k in self.wijnTerms)
@@ -87,14 +88,16 @@ Advice: increase nterms or lower maxA"""
             
     def mergeLDAandGamma(self):
         self.extractWijngaardenFromLDA()
-        self.lauricella_terms =np.sum(self.lda[:,:,newaxis,:]*
-                                        self.gamma[...,newaxis], axis = 1)  
+        self.lauricella_terms = np.sum(self.lda[:,:,newaxis,:]*
+                                        self.gamma[...,newaxis], axis = 1)
+                                        
+        self.lauricella_terms2 = self.lauricella_terms.copy()
         self.lauricella = levin_acceleration(self.lauricella_terms)
 
 def levin_acceleration(L, beta = 1.):
     def LB(n, k):
         return (beta + n + k)*power(beta + n + k, k-1)/power(beta+n+k+1,k)
-    def SB(n,k):
+    def SB(n, k):
         return (beta+n+k)*(beta+n+k-1)/((beta+n+2*k)*beta+n+2*k-1)
     
     ### remainder estimator
@@ -102,12 +105,37 @@ def levin_acceleration(L, beta = 1.):
     #rem = L[:-1]
     #rem = L[1:]*L[:-1]  (L[1:] - L[:-1])
     ###
-    denominator = recursive_generator(rem, LB)
-    numerator = recursive_generator(L.cumsum(axis=0)[:-1]*rem, LB)
-    return (numerator / denominator)[0]
+    denominator = recursive_generator(rem, SB)
+    rem = 1/L[1:]
+    numerator = recursive_generator(L.cumsum(axis=0)[:-1]*rem, SB)
+    return (numerator / denominator)
     
 def recursive_generator(L, f):
     M = L.shape[0]
-    for i in range(1,M):
+    for i in range(1,M-1):
         L[:-i] = L[1:M-i+1] - f(fmfy(arange(0,M-i)), i)[:,newaxis,newaxis]* L[:-i]
     return L[0,:,:]
+    
+def log_2(n):
+    return (-1)**n / n    
+    
+if __name__ == '__main__':
+    import InputParameters as BP
+    VOLTRANGE = fmfy(np.linspace(0,50,3)) * BP.GLOBAL_VOLT
+    basedist = mpf(1.0)/mpf(10**6)
+    distance = np.linspace(.5, 1.0, 3) * basedist
+    distance2 = np.ones_like(distance) * basedist
+    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
+              "c":[1,1,1,1],
+            "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
+                 "x":[distance2, -distance, distance2, -distance]}
+    A = BP.base_parameters(example1, V =VOLTRANGE)
+    B = Rfunc_CNCT(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
+                                maxParameter = A.maxParameter, prefac = A.prefac,
+                                V = A.V, scaledVolt = A.scaledVolt,
+                                distance = A.input_parameters["x"][0], Vq = A.Vq)
+    B.setParameter(nterms = 400, maxA = 8, maxK = 10)
+    B.genAnswer()
+    plt.figure()
+    plt.plot(B.rrfunction)
+    plt.show()
