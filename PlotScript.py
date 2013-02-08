@@ -34,16 +34,17 @@ def main_plot(saving = False):
     Vpoints = mp.linspace(0, mpf('1.')/mpf(10**4), 201)
     dist1 = mpf('2.2')/ mpf(10**(6))
     dist2 = mpf('1.8')/mpf(10**(6))
-    example1 = { 
+    genData = { 
         "v":[mpf(i) * mpf(10**j) for (i,j) in [(8,3),(8,3),(2,3),(2,3)]],
         "c":[1,1,1,1],
         "g":[mpf(1)/mpf(8),mpf(1)/mpf(8),mpf(1)/mpf(8),mpf(1)/mpf(8)],
          "x":[dist1, -dist2, dist1, -dist2]}
     mp.mp.dps= 60    
-    A = base_parameters(example1, V = Vpoints, Q = 1/mpf(4), T = 1/mpf(10**4))
+    A = base_parameters(genData, V = Vpoints, Q = 1/mpf(4), T = 1/mpf(10**4))
     B = Rfunc_constructor(A, method = 'series')
     B.setParameter(nterms = 250, maxA = 11, maxK = 11)
     single, interference = Current(B)
+    
     fig = plt.figure()
     xt = np.linspace(0, 1 * 10**(-4), 5)
     xt_labels = [str(int(i * 10**6)) for i in xt]      
@@ -153,9 +154,9 @@ def main_plot(saving = False):
 ##===============================================================================
 ## PLOTS FOR 5/2 STATE
 ##===============================================================================
-#
-#def particles_5_2(saving = False):
-#    
+
+def particles_5_2(saving = False):
+    
 #    genData = {
 #        "v":[mpf('.9')* mpf(10**(4)),mpf('2.')*mpf(10**(3))],\
 #        "g":[1/mpf(8),1/mpf(8)],\
@@ -168,62 +169,81 @@ def main_plot(saving = False):
 #    pfaff = {"Q":1/mpf(4),"g":[mpf(1)/mpf(8), mpf(1)/mpf(8)], "c":[1,1]}
 #    apf = {"Q":1/mpf(4), "g":[mpf(1)/mpf(8), mpf(3)/mpf(8)], "c":[-1,1]}
 #    state331 = {"Q" :1/mpf(4), "g":[mpf(1)/mpf(8), mpf(1)/mpf(4)], "c":[1,1]}  
-#    particleset = [pfaff, apf, state331, pfaffE2]
-#    names = ["Pfaffian (e/4)", 
-#             "Anti-Pfaffian (e/4)",
-#            "(3,3,1)-state (e/4)", 
-#            "Laughlin (e/2)"]
-#
-#    
-#
-#    fig = plt.figure()
-#    ax = fig.add_subplot(111)
-#    a = ''
-#    for i in range(len(names)):
-#        mp.mp.dps = 60
-#        a = RSeries.RfuncMP(par = genData, nterms = 800)
-#        #a = RCNTC.RfuncCNTC(par = genData, nterms = 100000)
-#        
-#        a.updateParameters(par = particleset[i])
-#            
-#        a.genAnswer()
-#        mp.mp.dps = 20
-#        a.plotRfunction(plotfig = ax, label = names[i]\
-#        , linewidth=1.5) 
-#        
-#        #del a.lda
-#        #del a
-#        
-#    dashstyle  = [(None, None), [10,4], [5,3,1,3], [2,4]]
-#    for i in range(len(ax.get_lines())):
-#        ax.get_lines()[i].set_color('black')
-#        ax.get_lines()[i].set_dashes(dashstyle[i])            
-#        
-#    ax.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$")
-#    ax.set_xlabel(r'Volt [$\mu$V]')
-#    ax.set_ybound([-.5, 1])
-#    ax.set_yticks([-0.25, 0, .25, .5, .75, 1])
-#    ax.set_yticklabels([-0.25, 0, 0.25, 0.5, 0.75, 1])
-#    xt = np.linspace(0, 2 * 10**(-4), 5)
-#    xt_labels = [str(int(i * 10**6)) for i in xt]
-#    ax.set_xticks(xt)
-#    ax.set_xticklabels(xt_labels)
-#    ax.set_title(r"Modulating function for $\nu = 5/2 $ candidates")
-#    ax.legend(loc='upper right', prop={'size':14})
-#    ax.grid(True)    
-#    plt.setp(ax.get_xticklabels(), fontsize=12.)
-#    plt.setp(ax.get_yticklabels(), fontsize=12.)
-#    if saving: plt.savefig('particles_5_2.png', bbox_inches=0, dpi=fig.dpi)
-#    plt.show()
-#    return a
-#    
+
+
+    Vpoints = mp.linspace(0, mpf('2.')/mpf(10**4), 201)
+    dist1 = mpf('1.7')/ mpf(10**(6))
+    dist2 = mpf('1.5')/mpf(10**(6))
+    genData = { 
+        "v":[mpf(i) * mpf(10**j) for (i,j) in [(9,3),(9,3),(2,3),(2,3)]],
+         "x":[dist1, -dist2, dist1, -dist2]}
+#    pfaffE2 = {
+#        "g":[mpf(1)/mpf(2)],
+#        "c":[1,1],
+#        "x":[dist1, -dist2],
+#        "v":[mpf(i) * mpf(10**j) for (i,j) in [(9,3),(9,3)]],"Q":1/mpf(2)}
+    pfaff = {
+        "g":[mpf(1)/mpf(8), mpf(1)/mpf(8),mpf(1)/mpf(8), mpf(1)/mpf(8)], 
+        "c":[1,1,1,1],"Q":1/mpf(4)}
+    apf = {
+        "g":[mpf(1)/mpf(8),mpf(1)/mpf(8),mpf(3)/mpf(8), mpf(3)/mpf(8)], 
+        "c":[1,1,-1,-1],"Q":1/mpf(4)}
+    state331 = {
+        "g":[mpf(1)/mpf(8), mpf(1)/mpf(8), mpf(1)/mpf(4), mpf(1)/mpf(4)], 
+        "c":[1,1,1,1],"Q":1/mpf(4)}
+
+    particleset = [pfaff, apf, state331]#, pfaffE2]
+    names = ["Pfaffian (e/4)", 
+             "Anti-Pfaffian (e/4)",
+            "(3,3,1)-state (e/4)"]#, 
+            #"Laughlin (e/2)"]
+
+    mp.mp.dps= 60    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ans = []
+    for i in range(len(names)):
+        particle = genData.copy()
+        particle.update(particleset[i])
+        Qe = particle["Q"]
+        del particle["Q"]
+        A = base_parameters(particle, V = Vpoints, Q = Qe, T = 1/mpf(10**4))
+        ans.append(A)
+        B = Rfunc_constructor(A, method = 'series')
+        B.setParameter(nterms = 500, maxA = 12, maxK = 12)
+        B.genAnswer()
+        ax.plot(Vpoints, B.rrfunction, label = names[i], linewidth=1.5) 
+
+        
+    dashstyle  = [(None, None), [10,4], [5,3,1,3], [2,4]]
+    for i in range(len(ax.get_lines())):
+        ax.get_lines()[i].set_color('black')
+        ax.get_lines()[i].set_dashes(dashstyle[i])            
+        
+    ax.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$")
+    ax.set_xlabel(r'Volt [$\mu$V]')
+    ax.set_ybound([-.5, 1])
+    ax.set_yticks([-0.25, 0, .25, .5, .75, 1])
+    ax.set_yticklabels([-0.25, 0, 0.25, 0.5, 0.75, 1])
+    xt = np.linspace(0, 2 * 10**(-4), 5)
+    xt_labels = [str(int(i * 10**6)) for i in xt]
+    ax.set_xticks(xt)
+    ax.set_xticklabels(xt_labels)
+    ax.set_title(r"Modulating function for $\nu = 5/2 $ candidates")
+    ax.legend(loc='upper right', prop={'size':14})
+    ax.grid(True)    
+    plt.setp(ax.get_xticklabels(), fontsize=12.)
+    plt.setp(ax.get_yticklabels(), fontsize=12.)
+    if saving: plt.savefig('particles_5_2.png', bbox_inches=0, dpi=fig.dpi)
+    plt.show()
+    return ans
 #
 ##===============================================================================
 ## PLOTS FOR 7/3 STATE
 ##===============================================================================
 #
 #
-#def particles_7_3(saving = False):
+def particles_7_3(saving = False):
 #    
 #    genData = {
 #    "v":[mpf('.9')* mpf(10**(4)),mpf('2.')*mpf(10**(3))],\
@@ -236,54 +256,74 @@ def main_plot(saving = False):
 #    aBS23 = {"Q":1/mpf(3),"g":[mpf(1)/mpf(3), mpf(5)/mpf(8)],"c":[1,1]}
 #    BS13 = {"Q":1/mpf(3), "g":[mpf(1)/mpf(3), mpf(3)/mpf(8)],"c":[-1,1]}
 #    aRR4 = {"Q" :1/mpf(6),"g":[mpf(1)/mpf(12), mpf(1)/mpf(4)], "c":[1,1]}  
-#    particleset = [aBS23, BS13, aRR4, LaughlinE3]
-#    names =[    r"$\overline{\mathrm{BS}}_{2/3}$ (e/3)",
-#                r"$\mathrm{BS}_{1/3}^{\psi}$ (e/3)",
-#                r"$\overline{\mathrm{RR}}_{k=4} $ (e/6)", 
+
+    Vpoints = mp.linspace(0, mpf('2.')/mpf(10**4), 201)
+    dist1 = mpf('1.7')/ mpf(10**(6))
+    dist2 = mpf('1.5')/mpf(10**(6))
+    genData = { 
+        "v":[mpf(i) * mpf(10**j) for (i,j) in [(9,3),(9,3),(2,3),(2,3)]],
+         "x":[dist1, -dist2, dist1, -dist2]}
+#    LaughlinE3 = {
+#        "g":[mpf(1)/mpf(2)],
+#        "c":[1,1],
+#        "x":[dist1, -dist2],
+#        "v":[mpf(i) * mpf(10**j) for (i,j) in [(9,3),(9,3)]],"Q":1/mpf(3)}
+    aBS23 = {
+        "g":[mpf(1)/mpf(3), mpf(1)/mpf(3),mpf(5)/mpf(8), mpf(5)/mpf(8)], 
+        "c":[1,1,1,1],"Q":1/mpf(3)}
+    BS13 = {
+        "g":[mpf(1)/mpf(3),mpf(1)/mpf(3),mpf(3)/mpf(8), mpf(3)/mpf(8)], 
+        "c":[1,1,-1,-1],"Q":1/mpf(3)}
+    aRR4 = {
+        "g":[mpf(1)/mpf(12), mpf(1)/mpf(12), mpf(1)/mpf(4), mpf(1)/mpf(4)], 
+        "c":[1,1,1,1],"Q":1/mpf(6)}
+
+
+    particleset = [aBS23, BS13, aRR4]#, LaughlinE3]
+    names =[    r"$\overline{\mathrm{BS}}_{2/3}$ (e/3)",
+                r"$\mathrm{BS}_{1/3}^{\psi}$ (e/3)",
+                r"$\overline{\mathrm{RR}}_{k=4} $ (e/6)"]#,
 #                r"Laughlin (e/3)"]
-#    
-#    xt = np.linspace(0, 2 * 10**(-4), 5)
-#    xt_labels = [str(int(i * 10**6)) for i in xt]
-#    #os.chdir('C:\\Data\\rfunc\\temp')
-#    fig = plt.figure()
-#    ax = fig.add_subplot(111)
-#    a = ''
-#    for i in range(0,len(particleset)):
-#        mp.mp.dps = 60
-#        a = RSeries.RfuncMP(par = genData, nterms = 700)
-#        #a = RCNTC.RfuncCNTC(par = genData, nterms = 100000)
-#        
-#        a.updateParameters(par = particleset[i])
-#            
-#        a.genAnswer()
-#        mp.mp.dps = 20
-#        a.plotRfunction(plotfig = ax, label = names[i]\
-#        , linewidth=1.5) 
-#        
-#        #del a.lda
-#        #del a
-#
-#    dashstyle  = [(None, None), [10,4], [5,3,1,3], [2,4]]
-#    for i in range(len(ax.get_lines())):
-#        ax.get_lines()[i].set_color('black')
-#        ax.get_lines()[i].set_dashes(dashstyle[i]) 
-#
-#    ax.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$")
-#    ax.set_xlabel(r'Volt [$\mu$V]')
-#    ax.set_ybound([-.5, 1])
-#    ax.set_yticks([-0.25, 0, .25, .5, .75, 1])
-#    ax.set_yticklabels([-0.25, 0, 0.25, 0.5, 0.75, 1])
-#    ax.set_xticks(xt)
-#    ax.set_xticklabels(xt_labels)
-#    ax.set_title(r"Modulating function for $\nu = 7/3 $ candidates")
-#    ax.legend(loc='upper right', prop={'size':14})
-#    ax.grid(True)
-#    plt.setp(ax.get_xticklabels(), fontsize=12.)
-#    plt.setp(ax.get_yticklabels(), fontsize=12.)
-#    if saving: plt.savefig('particles_7_3.png', bbox_inches=0, dpi=fig.dpi)
-#    plt.show()
-#    return a
-#    
+
+
+    mp.mp.dps= 60    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ans = []
+    for i in range(len(names)):
+        particle = genData.copy()
+        particle.update(particleset[i])
+        Qe = particle["Q"]
+        del particle["Q"]
+        A = base_parameters(particle, V = Vpoints, Q = Qe, T = 1/mpf(10**4))
+        ans.append(A)
+        B = Rfunc_constructor(A, method = 'series')
+        B.setParameter(nterms = 900, maxA = 12, maxK = 12)
+        B.genAnswer()
+        ax.plot(Vpoints, B.rrfunction, label = names[i], linewidth=1.5) 
+        
+    xt = np.linspace(0, 2 * 10**(-4), 5)
+    xt_labels = [str(int(i * 10**6)) for i in xt]
+    dashstyle  = [(None, None), [10,4], [5,3,1,3], [2,4]]
+    for i in range(len(ax.get_lines())):
+        ax.get_lines()[i].set_color('black')
+        ax.get_lines()[i].set_dashes(dashstyle[i]) 
+
+    ax.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$")
+    ax.set_xlabel(r'Volt [$\mu$V]')
+    ax.set_ybound([-.5, 1])
+    ax.set_yticks([-0.25, 0, .25, .5, .75, 1])
+    ax.set_yticklabels([-0.25, 0, 0.25, 0.5, 0.75, 1])
+    ax.set_xticks(xt)
+    ax.set_xticklabels(xt_labels)
+    ax.set_title(r"Modulating function for $\nu = 7/3 $ candidates")
+    ax.legend(loc='upper right', prop={'size':14})
+    ax.grid(True)
+    plt.setp(ax.get_xticklabels(), fontsize=12.)
+    plt.setp(ax.get_yticklabels(), fontsize=12.)
+    if saving: plt.savefig('particles_7_3.png', bbox_inches=0, dpi=fig.dpi)
+    plt.show()
+    
 #def plot_all(saveon = False):
 #    os.chdir('C:\\Science\\LaTeX\\Interferometer PRB')
 #    main_plot(saving = saveon)

@@ -12,6 +12,7 @@ import InputParameters as BP
 from Rfunc_series import Rfunc_series as Rseries
 from Rfunc_cnct import Rfunc_CNCT as Rcnct
 from Rfunc_cnct_fortran import Rfunc_fortran as Rfortran
+from Rfunc_series import from_hypergeometric as from_hypergeometric
 
 from mpl_toolkits.mplot3d import Axes3D
 from numpy import vectorize, linspace, newaxis
@@ -31,6 +32,8 @@ pi = mpf(mp.pi)
 
 
 def Rfunc_constructor(A, method = 'series'):
+    if A.parameters.shape[1] == 1:
+        constr = from_hypergeometric
     if method == 'series':
         constr = Rseries
     elif method =='cnct':
@@ -81,14 +84,14 @@ def plot_surface(A):
     plt.show()
     
 if __name__ == '__main__':
-    VOLTRANGE = fmfy(np.linspace(0,50,3)) * BP.GLOBAL_VOLT
+    VOLTRANGE = fmfy(np.linspace(0,50,2)) * BP.GLOBAL_VOLT
     basedist = mpf(1.0)/mpf(10**6)
     distance = np.linspace(.5, 1.0, 3) * basedist
     distance2 = np.ones_like(distance) * basedist
-    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
-              "c":[1,1,1,1],
-            "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
-                 "x":[distance2, -distance, distance2, -distance]}
+    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3)]],
+              "c":[1,1],
+            "g":[1/mpf(8),1/mpf(8)],
+                 "x":[distance, -distance]}
     A = BP.base_parameters(example1, V =VOLTRANGE)
     B = Rfunc_constructor(A, 'fortran')
     B.setParameter(nterms = 800, maxA = 8, maxK = 10)

@@ -100,6 +100,16 @@ class Rfunc_series(object):
         #cProfile.runctx('self.mergeLDAandGamma()', globals(), locals() )
         self.rfunction = self.prefac * self.lauricella
         self.rrfunction = freal(self.rfunction)
+
+class from_hypergeometric(Rfunc_series):
+    def genAnswer(self):
+        _hyp2f1 = np.vectorize(mp.hyp2f1)
+        self.lauricella = _hyp2f1(self.scaledVolt, self.g,\
+                                self.gtot, self.parameters)
+        
+        self.rfunction = self.prefac * self.lauricella
+        self.rrfunction = freal(self.rfunction)
+
         
 if __name__ == '__main__':
     import InputParameters as BP
