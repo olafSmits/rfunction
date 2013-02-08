@@ -27,6 +27,13 @@ pi = mpf(mp.pi)
 class Rfunc_CNCT(Rfunc.Rfunc_series):
     maxA = 10
     maxK = 9
+    def setParameter(self, nterms = None, maxA = None, maxK = None):
+        if maxA is not None:        
+            self.maxA = maxA
+        if maxK is not None:
+            self.maxK = maxK
+        if nterms is not None:
+            self.nterms = nterms
     def genWijngaardenTerms(self):  
         if 2**2*(self.maxA+1) - 1 >= self.nterms:
             print """

@@ -66,6 +66,8 @@ class Rfunc_series(object):
             self.parameters = self.parameters[:, newaxis]
         self.prefac = self.prefac * np.power(self.maxParameter, 
                                   -self.scaledVolt[...,newaxis])
+    def setParameter(self, nterms):
+        self.nterms = nterms
     def genLDA(self):
         self.power = np.power(self.parameters[...,newaxis], 
                          np.arange(1,self.nterms)[newaxis,newaxis,:])
