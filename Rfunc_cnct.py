@@ -73,9 +73,7 @@ Advice: increase nterms or lower maxA"""
         gDict = dict((k, fgamma(self.gtot + mpf(str(k)))/fgamma(self.gtot)) \
                         for k in self.wijnTerms)
         def f(i, j):
-            fg = fgamma(self.scaledVolt[j])
-            gamDict = dict((k, fgamma(self.scaledVolt[j] + mpf(str(k))) / \
-                                (fg*gDict[k])) for k in self.wijnTerms)
+            gamDict = self.__genGammaDict(j, gDict)
             gamDict[-1] = mpf('0')
             def g(n):
                 return gamDict[n]
@@ -85,6 +83,16 @@ Advice: increase nterms or lower maxA"""
         self.gamma = fmfy(np.ones((self.maxA, self.maxK, self.scaledVolt.size)))
         for j in xrange(self.scaledVolt.size):
             self.gamma[:,:,j] = f(self.wijngaardenArray, j)
+    def __genGammaDict(self, j, gDict):
+        if self.isZeroT:
+            return dict((k, self.scaledVolt[j]**k /gDict[k]) for k in self.wijnTerms)
+        else:
+            fg = fgamma(self.scaledVolt[j])
+            return dict((k, fgamma(self.scaledVolt[j] + mpf(str(k))) / \
+                                (fg*gDict[k])) for k in self.wijnTerms)
+
+
+
             
     def mergeLDAandGamma(self):
         self.extractWijngaardenFromLDA()
@@ -121,7 +129,7 @@ def log_2(n):
     
 if __name__ == '__main__':
     import InputParameters as BP
-    VOLTRANGE = fmfy(np.linspace(0,50,3)) * BP.GLOBAL_VOLT
+    VOLTRANGE = fmfy(np.linspace(0.01,50,5)) * BP.GLOBAL_VOLT
     basedist = mpf(1.0)/mpf(10**6)
     distance = np.linspace(.5, 1.0, 3) * basedist
     distance2 = np.ones_like(distance) * basedist
@@ -129,7 +137,7 @@ if __name__ == '__main__':
               "c":[1,1,1,1],
             "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
                  "x":[distance2, -distance, distance2, -distance]}
-    A = BP.base_parameters(example1, V =VOLTRANGE)
+    A = BP.base_parameters(example1, V =VOLTRANGE, Q= 1/mpf(4), T = mpf(5)/mpf(10**3))
     B = Rfunc_CNCT(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
                                 maxParameter = A.maxParameter, prefac = A.prefac,
                                 V = A.V, scaledVolt = A.scaledVolt,
@@ -139,3 +147,15 @@ if __name__ == '__main__':
     plt.figure()
     plt.plot(B.rrfunction)
     plt.show()
+    
+
+        
+    
+        
+    #    generalInput = {
+#    "v":[mpf('3')* mpf(10**(4)),mpf('5.')*mpf(10**(3))],\
+#    "g":[1/mpf(8),1/mpf(8)],\
+#    "c":[1,1],\
+#    "a1":mpf('1.7')/ mpf(10**(6)),     "a2":mpf('1.5')/mpf(10**(6)), \
+#    "T" :mpf(10) / mpf(10**(3)), "Q" :1/mpf(4)}    
+#    

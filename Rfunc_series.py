@@ -20,7 +20,6 @@ fexp = vectorize(mp.exp)
 pi = mpf(mp.pi)
 
 class Rfunc_series(object):
-    T = GLOBAL_TEMP
     nterms = 250
     parameters = EMP[:,newaxis]
     g = EMP[:,newaxis]
@@ -32,26 +31,17 @@ class Rfunc_series(object):
     def __init__(self, parameters, maxParameter, distance,
                  g, V, prefac, gtot,
                  scaledVolt, T, Vq):
-        if Vq is not None:
-            self.Vq = Vq
-        if distance is not None:
-            self.distance = distance
-        if parameters is not None:
-            self.parameters = parameters
-        if V is not None:
-            self.V = V
-        if T is not None:
-            self.T = T
-        if scaledVolt is not None:
-            self.scaledVolt = scaledVolt
-        if g is not None:
-            self.g = g
-        if maxParameter is not None:
-            self.maxParameter = maxParameter
-        if prefac is not None:
-            self.prefac = prefac
-        if gtot is not None:
-            self.gtot = gtot
+        self.Vq = Vq
+        self.distance = distance
+        self.parameters = parameters
+        self.V = V
+        self.T = T
+        self.isZeroT = mp.almosteq(self.T, mpf(0))
+        self.scaledVolt = scaledVolt
+        self.g = g
+        self.maxParameter = maxParameter
+        self.prefac = prefac
+        self.gtot = gtot
         ### input check ###            
         if len(self.maxParameter.shape) == 1:
             self.maxParameter = self.maxParameter[newaxis,:]
@@ -82,9 +72,7 @@ class Rfunc_series(object):
             self.lda[m,:] = np.sum(self.lda[:m,:][::-1] *\
                                         self.ts[:m,:], axis=0)/mpf(m)
     def genGamma(self):
-        self.gamma = np.arange(0, self.nterms)[:, newaxis] + \
-                                    self.scaledVolt[newaxis,:]
-        self.gamma = fgamma(self.gamma) / fgamma(self.scaledVolt)
+        self.gamma = self.__genGammaTerms()
         div = fgamma(self.gtot + np.arange(0, self.nterms)) / fgamma(self.gtot)
         self.gamma = self.gamma / div[:,newaxis]
     def mergeLDAandGamma(self):
@@ -100,7 +88,14 @@ class Rfunc_series(object):
         #cProfile.runctx('self.mergeLDAandGamma()', globals(), locals() )
         self.rfunction = self.prefac * self.lauricella
         self.rrfunction = freal(self.rfunction)
-
+    def __genGammaTerms(self):
+        if self.isZeroT:
+            _gam = np.arange(0, self.nterms)[:, newaxis]
+            return np.power(self.scaledVolt[newaxis,:], _gam)
+        else:
+            _gam = np.arange(0, self.nterms)[:, newaxis] + \
+                                    self.scaledVolt[newaxis,:]
+            return fgamma(_gam) / fgamma(self.scaledVolt)
 class from_hypergeometric(Rfunc_series):
     def genAnswer(self):
         _hyp2f1 = np.vectorize(mp.hyp2f1)
@@ -113,21 +108,40 @@ class from_hypergeometric(Rfunc_series):
         
 if __name__ == '__main__':
     import InputParameters as BP
-    VOLTRANGE = fmfy(np.linspace(0,50,3)) * BP.GLOBAL_VOLT
-    basedist = mpf(1.0)/mpf(10**6)
-    distance = np.linspace(.5, 1.0, 3) * basedist
+    VOLTRANGE = fmfy(np.linspace(0,200,50)) * mpf(1)/ mpf(10**6)
+#    basedist = mpf(1.0)/mpf(10**6)
+#    distance = np.linspace(0.1, 1.0, 5) * basedist
+#    distance2 = np.ones_like(distance) * basedist
+#    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
+#              "c":[1,1,1,1],
+#            "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
+#                 "x":[distance2, -distance, distance2, -distance]}
+#    A = BP.base_parameters(example1, V =VOLTRANGE, Q = 1/mpf(4), T = 1 / mpf(10**4))
+#    B = Rfunc_series(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
+#                                maxParameter = A.maxParameter, prefac = A.prefac,
+#                                V = A.V, scaledVolt = A.scaledVolt,
+#                                distance = A.input_parameters["x"][0], Vq = A.Vq)
+#    B.setParameter(nterms = 200)
+#    B.genAnswer()
+#    plt.figure()
+#    plt.plot(B.rrfunction)
+#    plt.show()
+    
+    basedist = mpf(1.5)/mpf(10**6)
+    distance = np.linspace(.8, 1.2, 3) * basedist
     distance2 = np.ones_like(distance) * basedist
-    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
-              "c":[1,1,1,1],
-            "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
+    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(3,4),(3,4),(5,3),(5,3)]],
+                 "c":[1,1,1,1],
+                 "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
                  "x":[distance2, -distance, distance2, -distance]}
-    A = BP.base_parameters(example1, V =VOLTRANGE)
+    A = BP.base_parameters(example1, V =VOLTRANGE, Q= 1/mpf(4), T = 0 )
     B = Rfunc_series(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
                                 maxParameter = A.maxParameter, prefac = A.prefac,
                                 V = A.V, scaledVolt = A.scaledVolt,
                                 distance = A.input_parameters["x"][0], Vq = A.Vq)
-    B.setParameter(nterms = 800)
+    B.setParameter(nterms = 200, maxA = 8, maxK = 10)
     B.genAnswer()
     plt.figure()
     plt.plot(B.rrfunction)
     plt.show()
+    

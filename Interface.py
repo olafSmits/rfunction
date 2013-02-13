@@ -34,7 +34,7 @@ pi = mpf(mp.pi)
 def Rfunc_constructor(A, method = 'series'):
     if A.parameters.shape[1] == 1:
         constr = from_hypergeometric
-    if method == 'series':
+    elif method == 'series':
         constr = Rseries
     elif method =='cnct':
         constr = Rcnct

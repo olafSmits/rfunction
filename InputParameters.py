@@ -2,13 +2,14 @@
 """
 Created on Tue Feb 05 17:04:52 2013
 """
-
+from pprint import pprint
 import numpy as np
 import sympy.mpmath as mp
 
 from numpy import newaxis, vectorize
 from sympy.mpmath import mpf, mpc, exp
 
+fmfy = vectorize(mp.mpmathify)
 fexp = np.vectorize(exp)
 fmpc = vectorize(mpc)
 
@@ -25,28 +26,19 @@ EMP= np.array([])
 
 
 class base_parameters(object):
-    T = GLOBAL_TEMP
-    V = [GLOBAL_VOLT, GLOBAL_VOLT*10]
-    Q =  1/mpf(4)
     input_parameters = { "v":EMP,"c":EMP,"g":EMP,"x":EMP}
-    def __init__(self, input_parameters, V = None, Q = None, T = None):
-
-########## Process input
+    def __init__(self, input_parameters, V, Q, T):
+        self.V, self.Q, self.T = V, mpf(Q), mpf(T)
+########## Process input # Perform Sanity Checks ###########
         for i, j in input_parameters.items():
-            if isinstance(j, np.ndarray):         
-                self.input_parameters[i] = j
-            else:
-                self.input_parameters[i] = np.asarray(j)
-        if len(set(map(len, input_parameters.items()))) > 1:
+            if not isinstance(j, list):
+                raise ValueError
+            self.input_parameters[i] = np.asarray(j)
+        if len(set(map(len, input_parameters.values()))) > 1:
             raise ValueError
-        if T is not None:
-            self.T = T
-        if V is not None:
-            self.V = V
-        if Q is not None:
-            self.Q = Q
         if not isinstance(self.V, np.ndarray) or not isinstance(self.V, list):
             self.V = np.array([self.V]).ravel()
+        self.isZeroT = mp.almosteq(self.T, mpf(0))
 ########### Restructure distance and voltage, if necessary
         if len(self.input_parameters["x"].shape) == 1:
             self.input_parameters["x"] = self.input_parameters["x"][:,newaxis]
@@ -67,13 +59,12 @@ class base_parameters(object):
         self.parameters = c[:,newaxis] * x / v[:,newaxis]
         m, n = self.parameters.shape
         self.g = np.transpose(np.vstack([[g]]*n))      
-        sort_ind = np.argsort(self.parameters, axis = 0)       
+        sort_ind = np.argsort(self.parameters, axis = 0)
         self.parameters = apply_take(self.parameters, sort_ind)
         self.g = apply_take(self.g, sort_ind)
 
-        # Determine prefactor        
-        fac = 2*pi*BLTZMN*self.T / HBAR        
-        self.prefac = fexp(np.sum(self.g * self.parameters, axis = 1)*fac/mpf(2))
+        # Determine prefactor      
+        self.genPrefactor()
         
         # Remove duplicates in self.parameter
         # Adjust self.g accordingly
@@ -95,7 +86,7 @@ class base_parameters(object):
                     new_g_line = np.delete(new_g_line, j+1)
                     
             # compute exponentiated parameters, z_i = exp(x_i/v_i)
-            new_line = fexp(fac*new_line)
+            new_line = self.getNextLine(new_line)
             maxP, argm = np.max(new_line), np.argmax(new_line)
             
             #remove largest parameter, z_max
@@ -104,18 +95,53 @@ class base_parameters(object):
             new_g_line = np.delete(new_g_line, argm)
             
             # final parameters: 1- z_i/z_max
-            new_line = 1- new_line / maxP
+            new_line = self.getParameter(new_line, maxP)
             
             new_parameters.append(new_line)
             new_g.append(new_g_line)
-
+        
         self.maxParameter = np.array(maxParameter)
+        if self.isZeroT:
+            self.maxParameter = fexp(self.maxParameter)
         self.parameters = np.array(new_parameters)
         self.g = np.array(new_g)
         # Note: self.parameters and self.g has as alements: arrays
         # for each value of inputparameters a possible reduction can take place.
 
     def genScaledVoltage(self):
-        self.Vq = self.Q*ELEC*self.V/(2*pi*BLTZMN*self.T)        
-        self.scaledVolt = fmpc(self.gtot /mpf(2), - self.Vq )
-        
+        if self.isZeroT:
+            self.Vq = self.Q*ELEC*self.V / HBAR
+            self.scaledVolt = -1j*self.Vq
+        else:
+            self.Vq = self.Q*ELEC*self.V/(2*pi*BLTZMN*self.T)        
+            self.scaledVolt = fmpc(self.gtot /mpf(2), - self.Vq )
+    def genPrefactor(self):
+        if self.isZeroT:
+            self.prefac = fmfy(np.ones_like(self.parameters[:,0]))
+        else:
+            fac = 2*pi*BLTZMN*self.T / HBAR        
+            self.prefac = fexp(np.sum(self.g * self.parameters, axis = 1)*fac/mpf(2))
+    def getNextLine(self, new_line):
+        if self.isZeroT:
+            return new_line
+        else:
+            fac = 2*pi*BLTZMN*self.T / HBAR 
+            return fexp(fac*new_line)
+    def getParameter(self, new_line, maxP):
+        if self.isZeroT:
+            return maxP - new_line
+        else:
+            return 1- new_line / maxP
+
+
+if __name__ == '__main__':
+    Vpoints = mp.linspace(0, mpf('2.')/mpf(10**4), 201)
+    dist1 = mpf('1.7')/ mpf(10**(6))
+    dist2 = mpf('1.5')/mpf(10**(6))
+    genData = { 
+         "v":[mpf(i) * mpf(10**j) for (i,j) in [(3,4),(3,4),(5,3),(5,3)]],
+         "c":[1,1,1,1],
+         "g":[1/mpf(8), 1/mpf(8), 1/mpf(8), 1/mpf(8)],
+         "x":[dist1, -dist2, dist1, -dist2]}
+    
+    A = base_parameters(genData, V = Vpoints, Q = 1/mpf(4), T = 0)

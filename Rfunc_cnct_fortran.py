@@ -38,8 +38,8 @@ class Rfunc_fortran(Rcnct.Rfunc_CNCT):
         
     def mergeLDAandGamma(self):
         self.extractWijngaardenFromLDA()
-        self.gamma = np.complex128(self.gamma)
-        self.lda = np.complex128(self.lda)
+        self.gamma = self.gamma
+        self.lda = fmfy(self.lda)
         self.lauricella_terms =np.asfortranarray(np.sum(self.lda[:,:,newaxis,:]*
                                         self.gamma[...,newaxis], axis = 1))
                                         
@@ -49,21 +49,53 @@ class Rfunc_fortran(Rcnct.Rfunc_CNCT):
         
 if __name__ == '__main__':
     import InputParameters as BP
-    VOLTRANGE = fmfy(np.linspace(0,50,3)) * BP.GLOBAL_VOLT
-    basedist = mpf(1.0)/mpf(10**6)
-    distance = np.linspace(.5, 1.0, 3) * basedist
+    VOLTRANGE = fmfy(np.linspace(0,200,50)) * mpf(1)/ mpf(10**6)
+#    basedist = mpf(1.0)/mpf(10**6)
+#    distance = np.linspace(.001, 1.0, 40) * basedist
+#    distance2 = np.ones_like(distance) * basedist
+#    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
+#              "c":[1,1,1,1],
+#            "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
+#                 "x":[distance2, -distance, distance2, -distance]}
+#    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3)]],
+#              "c":[1,1],
+#            "g":[1/mpf(8),1/mpf(8)],
+#                 "x":[distance2, -distance]}
+#    A = BP.base_parameters(example1, V =VOLTRANGE, Q= 1/mpf(4), T = 5/ mpf(10**3))
+#    B = Rfunc_fortran(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
+#                                maxParameter = A.maxParameter, prefac = A.prefac,
+#                                V = A.V, scaledVolt = A.scaledVolt,
+#                                distance = A.input_parameters["x"][0], Vq = A.Vq)
+#    B.setParameter(nterms = 1500, maxA = 15, maxK = 15)
+#    B.genAnswer()
+#    plt.figure()
+#    plt.plot(B.rrfunction)
+#    plt.show()
+    
+    basedist = mpf(1.5)/mpf(10**6)
+    distance = np.linspace(.8, 1.2, 3) * basedist
     distance2 = np.ones_like(distance) * basedist
-    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(2,3),(2,3),(8,3),(8,3)]],
-              "c":[1,1,1,1],
-            "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
+    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(3,4),(3,4),(5,3),(5,3)]],
+                 "c":[1,1,1,1],
+                 "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
                  "x":[distance2, -distance, distance2, -distance]}
-    A = BP.base_parameters(example1, V =VOLTRANGE)
+    A = BP.base_parameters(example1, V =VOLTRANGE, Q= 1/mpf(4), T = mpf(20)/10**3 )
     B = Rfunc_fortran(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
                                 maxParameter = A.maxParameter, prefac = A.prefac,
                                 V = A.V, scaledVolt = A.scaledVolt,
                                 distance = A.input_parameters["x"][0], Vq = A.Vq)
-    B.setParameter(nterms = 800, maxA = 8, maxK = 10)
+    B.setParameter(nterms = 200000, maxA = 15, maxK = 15)
     B.genAnswer()
     plt.figure()
     plt.plot(B.rrfunction)
     plt.show()
+    
+    
+    
+    #    generalInput = {
+#    "v":[mpf('3')* mpf(10**(4)),mpf('5.')*mpf(10**(3))],\
+#    "g":[1/mpf(8),1/mpf(8)],\
+#    "c":[1,1],\
+#    "a1":mpf('1.7')/ mpf(10**(6)),     "a2":mpf('1.5')/mpf(10**(6)), \
+#    "T" :mpf(10) / mpf(10**(3)), "Q" :1/mpf(4)}    
+#    
