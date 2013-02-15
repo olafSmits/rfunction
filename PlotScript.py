@@ -115,7 +115,7 @@ def temperature(saving = False):
             B = Rfunc_constructor(A, method = 'fortran')
             B.setParameter(nterms = 200000, maxA = 25, maxK = 25)
         B.genAnswer()
-        ans.append(B)
+        ans.append([A,B])
         ax.plot(Vpoints, B.rrfunction, \
                             label = str(names[i]) +' [mK]', linewidth=1.5) 
                             
@@ -277,6 +277,8 @@ def particles_7_3(saving = False):
     ax.set_ybound([-.5, 1])
     ax.set_yticks([-0.25, 0, .25, .5, .75, 1])
     ax.set_yticklabels([-0.25, 0, 0.25, 0.5, 0.75, 1])
+    xt = np.linspace(0, 2 * 10**(-4), 5)
+    xt_labels = [str(int(i * 10**6)) for i in xt]    
     ax.set_xticks(xt)
     ax.set_xticklabels(xt_labels)
     ax.set_title(r"Modulating function for $\nu = 7/3 $ candidates")
