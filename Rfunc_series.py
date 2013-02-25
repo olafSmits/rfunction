@@ -96,13 +96,31 @@ class Rfunc_series(object):
             _gam = np.arange(0, self.nterms)[:, newaxis] + \
                                     self.scaledVolt[newaxis,:]
             return fgamma(_gam) / fgamma(self.scaledVolt)
+
+            
 class from_hypergeometric(Rfunc_series):
     def genAnswer(self):
-        _hyp2f1 = np.vectorize(mp.hyp2f1)
-        self.lauricella = _hyp2f1(self.scaledVolt, self.g,\
-                                self.gtot, self.parameters)
-        
-        self.rfunction = self.prefac * self.lauricella
+
+        if self.isZeroT:
+            p = -1j*(self.scaledVolt[:,newaxis] * np.transpose(self.parameters))/2
+            g = self.gtot/2-1/mpf(2)
+            def _f(x):
+                return mp.gamma(g+1)* \
+                np.power(x/mpf(2), -g) * \
+                mp.exp(1j*x) * mp.besselj(g, x)
+            __f = np.vectorize(_f)
+            self.lauricella = __f(p)
+        else:                
+            _hyp2f1 = np.vectorize(mp.hyp2f1)
+            self.lauricella = _hyp2f1(self.scaledVolt[:,newaxis], self.gtot/2,\
+                                self.gtot, np.transpose(self.parameters))
+
+
+        if len(self.lauricella.shape)== 1:
+            self.rfunction = self.prefac * self.lauricella[:,newaxis]
+        else:
+            self.rfunction = self.prefac * self.lauricella
+            
         self.rrfunction = freal(self.rfunction)
 
         
@@ -127,21 +145,42 @@ if __name__ == '__main__':
 #    plt.plot(B.rrfunction)
 #    plt.show()
     
-    basedist = mpf(1.5)/mpf(10**6)
-    distance = np.linspace(.8, 1.2, 3) * basedist
-    distance2 = np.ones_like(distance) * basedist
-    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(3,4),(3,4),(5,3),(5,3)]],
-                 "c":[1,1,1,1],
-                 "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
-                 "x":[distance2, -distance, distance2, -distance]}
-    A = BP.base_parameters(example1, V =VOLTRANGE, Q= 1/mpf(4), T = 0 )
-    B = Rfunc_series(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
-                                maxParameter = A.maxParameter, prefac = A.prefac,
-                                V = A.V, scaledVolt = A.scaledVolt,
-                                distance = A.input_parameters["x"][0], Vq = A.Vq)
-    B.setParameter(nterms = 200, maxA = 8, maxK = 10)
+#    basedist = mpf(1.5)/mpf(10**6)
+#    distance = np.linspace(.8, 1.2, 3) * basedist
+#    distance2 = np.ones_like(distance) * basedist
+#    example1 = { "v":[mpf(i) * mpf(10**j) for (i,j) in [(3,4),(3,4),(5,3),(5,3)]],
+#                 "c":[1,1,1,1],
+#                 "g":[1/mpf(8),1/mpf(8),1/mpf(8),1/mpf(8)],
+#                 "x":[distance2, -distance, distance2, -distance]}
+#    A = BP.base_parameters(example1, V =VOLTRANGE, Q= 1/mpf(4), T = 0 )
+#    B = Rfunc_series(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
+#                                maxParameter = A.maxParameter, prefac = A.prefac,
+#                                V = A.V, scaledVolt = A.scaledVolt,
+#                                distance = A.input_parameters["x"][0], Vq = A.Vq)
+#    B.setParameter(nterms = 200, maxA = 8, maxK = 10)
     B.genAnswer()
     plt.figure()
     plt.plot(B.rrfunction)
     plt.show()
     
+#===============================================================================
+# 
+#===============================================================================
+    Vpoints = mp.linspace(0, mpf('2.')/mpf(10**4), 201)
+    dist1 = np.array([mpf('1.7') / mpf(10**(6)), mpf('1.7')/ mpf(10**(6))])
+    dist2 = np.array([mpf('1.5') / mpf(10**(6)), mpf('1.7') / mpf(10**(6))])
+    genData = { 
+         "v":[mpf(i) * mpf(10**j) for (i,j) in [(3,4),(3,4)]],
+         "c":[1,1],
+         "g":[1/mpf(8), 1/mpf(8)],
+         "x":[dist1, -dist2]}
+    
+    A = BP.base_parameters(genData, V = Vpoints, Q = 1/mpf(4), T = 0)
+    B = Rfunc_series(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
+                                maxParameter = A.maxParameter, prefac = A.prefac,
+                                V = A.V, scaledVolt = A.scaledVolt,
+                                distance = A.input_parameters["x"][0], Vq = A.Vq)
+    B.genAnswer()
+    plt.figure()
+    plt.plot(B.rrfunction)
+    plt.show()                                

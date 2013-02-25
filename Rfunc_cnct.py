@@ -123,9 +123,7 @@ def recursive_generator(L, f):
     for i in range(1,M-1):
         L[:-i] = L[1:M-i+1] - f(fmfy(arange(0,M-i)), i)[:,newaxis,newaxis]* L[:-i]
     return L[0,:,:]
-    
-def log_2(n):
-    return (-1)**n / n    
+
     
 if __name__ == '__main__':
     import InputParameters as BP

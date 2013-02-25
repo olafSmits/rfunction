@@ -3,31 +3,39 @@
 Created on Fri Feb 15 19:39:23 2013
 """
 from __future__ import division
-import numpy as np
 import sympy.mpmath as mp
-import matplotlib.pylab as plt
-from numpy import newaxis, vectorize
 from sympy.mpmath import mpf
-from InputParameters import GLOBAL_TEMP, EMP, ELEC, HBAR
+import time as time
+import numpy as np
+import matplotlib.pyplot as plt
+from numpy.fft import rfft
 
+import os
+mp.mp.dps= 20
+mp.mp.pretty = True
 
+from Interface import Rfunc_constructor, Current
+from InputParameters import base_parameters, ELEC, HBAR
+
+#
 b = A[0]
+#
+vc = b.input_parameters["v"][0]
+#vn = b.input_parameters["v"][-1]
+a1 = b.input_parameters["x"][0]
+a2 = -b.input_parameters["x"][1]
+#
+#
+#
+##l1 = 2*np.pi/(ELEC/4*(a1)) * abs((1/v1 ))**(-1) * HBAR    
+##l2 = 2*np.pi/(ELEC/4*(a1)) * abs((1/v2))**(-1) * HBAR    
+#
+#
+#fna1 = ELEC*a1/(vn*4*2*np.pi*HBAR)
+#fna2 = ELEC*a2/(vn*4*2*np.pi*HBAR)
+fca1 = ELEC*a1/(vc*4*2*np.pi*HBAR)
+fca2 = ELEC*a2/(vc*4*2*np.pi*HBAR)
 
-v1 = b.input_parameters["v"][0]
-v2 = b.input_parameters["v"][-1]
-a1 = (b.input_parameters["x"][0] - b.input_parameters["x"][1])/2
-
-
-
-l1 = 2*np.pi/(ELEC/4*(a1)) * abs((1/v1 ))**(-1) * HBAR    
-l2 = 2*np.pi/(ELEC/4*(a1)) * abs((1/v2))**(-1) * HBAR    
-
-f1 = 1/l1[0] 
-f2 = 1/l2[0]
-f1 = ELEC*a1/(v1*4*2*np.pi*HBAR)
-f2 = ELEC*a1/(v2*4*2*np.pi*HBAR)
-print f1/f2
-print (v1+v2)/(v1-v2)
 
 
 def plotSpectrum(R, V, d):
@@ -89,8 +97,10 @@ def plotSpectrum(R, V, d):
     ax1.xaxis.set_label_coords(1.05, -0.1)
     ax = fig.add_subplot(212)
     ax.set_title(r'Fourier transform')
-    plt.axvline(f1 * 10**(-6), color = 'purple', linewidth = 2, label = r'$f_1$ = $e^*x/(v_c\pi\hbar$)')     
-    plt.axvline(f2 * 10**(-6), color = 'green', linewidth = 2, label = r'$f_2$ = $e^*x/(v_n\pi\hbar$)')     
+#    plt.axvline(fna1 * 10**(-6), color = 'purple', linewidth = 2, label = r'$f_1$ = $e^*a/(v_n2\pi\hbar$)')     
+#    plt.axvline(fna2 * 10**(-6), color = 'green', linewidth = 2, label = r'$f_2$ = $e^*b/(v_n2\pi\hbar$)')     
+    plt.axvline(fca1 * 10**(-6), color = 'grey', linewidth = 2, label = r'$f_3$ = $e^*a/(v_c2\pi\hbar$)')  
+    plt.axvline(fca2 * 10**(-6), color = 'cyan', linewidth = 2, label = r'$f_4$ = $e^*b/(v_c2\pi\hbar$)')  
     ax.plot(frq[:frq.size//4],abs(Y)[:frq.size//4],'x') # plotting the spectrum
     ax.plot(frq[:frq.size//4],abs(Y)[:frq.size//4],'r') 
     ax.set_xlabel(r'FFT [1/$\mu$V]')
