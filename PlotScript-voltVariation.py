@@ -7,7 +7,7 @@ from sympy.mpmath import mpf
 import time as time
 import numpy as np
 import matplotlib.pyplot as plt
-
+import copy
 
 import os
 mp.mp.dps= 20
@@ -16,14 +16,14 @@ mp.mp.pretty = True
 from Interface import Rfunc_constructor, Current
 from InputParameters import base_parameters 
 
-plt.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica'], 'size' : 16})
+plt.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica'], 'size' : 12})
 ## for Palatino and other serif fonts use:
 #rc('font',**{'family':'serif','serif':['Palatino']})
-plt.rc('text', usetex=True)
+#plt.rc('text', usetex=True)
 _mp = np.vectorize(mp.mpf)
 
 #===============================================================================
-# MAIN PLOT
+# MAIN PLOT (Current + Hmod vs Voltage)
 #===============================================================================
 
 def main_plot(saving = False):
@@ -84,7 +84,7 @@ def main_plot(saving = False):
     return B
     
 #===============================================================================
-# TEMPERATURE    
+# TEMPERATURE VARIATION (Hmod vs Voltage)
 #===============================================================================
     
 def temperature(saving = False):
@@ -115,7 +115,8 @@ def temperature(saving = False):
             B = Rfunc_constructor(A, method = 'fortran')
             B.setParameter(nterms = 200000, maxA = 25, maxK = 25)
         B.genAnswer()
-        ans.append([A,B])
+
+        ans.append(c)
         ax.plot(Vpoints, B.rrfunction, \
                             label = str(names[i]) +' [mK]', linewidth=1.5) 
                             
@@ -178,7 +179,7 @@ def particles_5_2(saving = False):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ans = []
-    for i in range(len(names)):
+    for i in range(2,3):
         particle = genData.copy()
         particle.update(particleset[i])
         Qe = particle["Q"]
@@ -187,7 +188,8 @@ def particles_5_2(saving = False):
         B = Rfunc_constructor(A, method = 'series')
         B.setParameter(nterms = 500, maxA = 12, maxK = 12)
         B.genAnswer()
-        ans.append(B)
+        c = [copy.deepcopy(A),copy.deepcopy(B)]
+        ans.append(c)
         if B.rrfunction.shape[1] > 1:
             ax.plot(Vpoints, B.rrfunction[:,0], label = names[i], linewidth=1.5) 
         else:
@@ -308,7 +310,9 @@ def particles_7_3(saving = False):
 ##A.genAnswer()
 
 
-
+#===============================================================================
+# MULTIPLE MODES -- NOT YET IMPLEMENTED
+#===============================================================================
 
 
 def multi_modes(saving = False):

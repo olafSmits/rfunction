@@ -25,6 +25,12 @@ pi = mpf(mp.pi)
 
 
 class Rfunc_CNCT(Rfunc.Rfunc_series):
+    """
+    This implements the computation of the R function using the CNCT method.
+    It makes use of the mpmath module.
+    
+    It is not very effective for two reasons: compu
+    """
     maxA = 10
     maxK = 9
     def setParameter(self, nterms = None, maxA = None, maxK = None):

@@ -7,6 +7,7 @@ from __future__ import division
 import numpy as np
 import sympy.mpmath as mp
 import matplotlib.pylab as plt
+import time
 from numpy import newaxis, vectorize
 from sympy.mpmath import mpf
 from InputParameters import GLOBAL_TEMP, EMP
@@ -81,13 +82,17 @@ class Rfunc_series(object):
     def genAnswer(self):
         #cProfile.runctx('self.genLDA()', globals(), locals() )
         #cProfile.runctx('self.genGamma()', globals(), locals() )
-        
+        t1 = time.time()
         self.genLDA()
         self.genGamma()
         self.mergeLDAandGamma()
         #cProfile.runctx('self.mergeLDAandGamma()', globals(), locals() )
         self.rfunction = self.prefac * self.lauricella
         self.rrfunction = freal(self.rfunction)
+        t2 = time.time()
+        t3 = (t2-t1)*10**3
+        print "R function computed (g = " + str(self.gtot) + "). Took: " + \
+                str(t3) + " seconds."
     def __genGammaTerms(self):
         if self.isZeroT:
             _gam = np.arange(0, self.nterms)[:, newaxis]
