@@ -29,11 +29,10 @@ class Rfunc_series(object):
     maxParameter = EMP
     prefac = EMP
     gtot = EMP
-    def __init__(self, parameters, maxParameter, distance,
+    def __init__(self, parameters, maxParameter, 
                  g, V, prefac, gtot,
                  scaledVolt, T, Vq):
         self.Vq = Vq
-        self.distance = distance
         self.parameters = parameters
         self.V = V
         self.T = T
@@ -90,7 +89,7 @@ class Rfunc_series(object):
         self.rfunction = self.prefac * self.lauricella
         self.rrfunction = freal(self.rfunction)
         t2 = time.time()
-        t3 = (t2-t1)*10**3
+        t3 = np.round((t2-t1), decimals =1)
         print "R function computed (g = " + str(self.gtot) + "). Took: " + \
                 str(t3) + " seconds."
     def __genGammaTerms(self):
@@ -163,10 +162,10 @@ if __name__ == '__main__':
 #                                V = A.V, scaledVolt = A.scaledVolt,
 #                                distance = A.input_parameters["x"][0], Vq = A.Vq)
 #    B.setParameter(nterms = 200, maxA = 8, maxK = 10)
-    B.genAnswer()
-    plt.figure()
-    plt.plot(B.rrfunction)
-    plt.show()
+#    B.genAnswer()
+#    plt.figure()
+#    plt.plot(B.rrfunction)
+#    plt.show()
     
 #===============================================================================
 # 

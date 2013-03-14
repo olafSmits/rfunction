@@ -16,10 +16,10 @@ mp.mp.pretty = True
 from Interface import Rfunc_constructor, Current
 from InputParameters import base_parameters 
 
-plt.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica'], 'size' : 12})
+plt.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica'], 'size' : 16})
 ## for Palatino and other serif fonts use:
 #rc('font',**{'family':'serif','serif':['Palatino']})
-#plt.rc('text', usetex=True)
+plt.rc('text', usetex=True)
 _mp = np.vectorize(mp.mpf)
 
 #===============================================================================
@@ -55,31 +55,33 @@ def main_plot(saving = False):
     ax.get_lines()[1].set_dashes([5,2])    
     for i in ax.get_lines(): i.set_color('black')
   
-    ax.set_title(r'Tunnelling current for the Pfaffian state')
-    ax.set_ylabel(r"$I_B/\mathrm{max}(I_B){}$")
+    ax.set_title(r'Tunnelling current for the Pfaffian state', fontsize=16)
+    ax.set_ylabel(r"$I_B/\mathrm{max}(I_B){}$", fontsize=16)
     ax.set_ybound([0,1])
     ax.set_yticks([.25, .5, .75, 1])
     ax.set_yticklabels([0.25, 0.5, 0.75, 1])
     ax.set_xticks(xt)
     ax.set_xticklabels([])
-    ax.legend(loc = 'upper right', prop={'size':12})
-    plt.setp(ax.get_xticklabels(), fontsize = 12.)
-    plt.setp(ax.get_yticklabels(), fontsize = 12.)    
+    ax.legend(loc = 'upper right', prop={'size':14})
+    plt.setp(ax.get_xticklabels(), fontsize = 14)
+    plt.setp(ax.get_yticklabels(), fontsize = 14)    
     ax.grid(True)
     ax2 = fig.add_subplot(212)
     ax2.plot(Vpoints, B.rrfunction, linewidth=1.5) 
     ax2.get_lines()[0].set_color('black')
-    ax2.set_title(r'Modulating function for the Pfaffian state')
-    ax2.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$")
-    ax2.set_xlabel(r'Volt [$\mu$V]')
+    ax2.set_title(r'Modulating function for the Pfaffian state', fontsize=16)
+    ax2.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$", fontsize=16)
+    ax2.set_xlabel(r'Voltage [$\mu$V]', fontsize=16)
+    ax2.xaxis.set_label_coords(.9, -0.12)
     ax2.set_yticks([-0.25,0,.25,.5,.75,1])
     ax2.set_yticklabels([-0.25,0,0.25,0.5,0.75,1])
     ax2.set_xticks(xt) 
     ax2.set_xticklabels(xt_labels)
     ax2.grid(True)
-    plt.setp(ax2.get_xticklabels(), fontsize=12.)
-    plt.setp(ax2.get_yticklabels(), fontsize=12.)        
+    plt.setp(ax2.get_xticklabels(), fontsize=14)
+    plt.setp(ax2.get_yticklabels(), fontsize=14)        
     if saving: plt.savefig('main_plot.png', bbox_inches=0, dpi=fig.dpi)
+    plt.subplots_adjust(hspace=0.3)
     plt.show()
     return B
     
@@ -116,7 +118,7 @@ def temperature(saving = False):
             B.setParameter(nterms = 200000, maxA = 25, maxK = 25)
         B.genAnswer()
 
-        ans.append(c)
+        ans.append(B)
         ax.plot(Vpoints, B.rrfunction, \
                             label = str(names[i]) +' [mK]', linewidth=1.5) 
                             
@@ -126,17 +128,18 @@ def temperature(saving = False):
         ax.get_lines()[i].set_dashes(dashstyle[i])
     xt = np.linspace(0, 2 * 10**(-4), 5)
     xt_labels = [str(int(i * 10**6)) for i in xt]        
-    ax.set_title(r'The modulating function \\ for different temperature scales')
-    ax.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$")
-    ax.set_xlabel(r'Volt [$\mu$V]')
+    ax.set_title(r'The modulating function \\ for different temperature scales', fontsize=16)
+    ax.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$", fontsize=16)
+    ax.set_xlabel(r'Voltage [$\mu$V]', fontsize=16)
+    ax.xaxis.set_label_coords(.9, -0.06)
     ax.set_yticks([-0.25,0,.25,.5,.75,1])
     ax.set_yticklabels([-0.25,0,0.25,0.5,0.75,1])
     ax.set_xticks(xt)
     ax.set_xticklabels(xt_labels)
     ax.grid(True)
     ax.legend(loc='upper right', prop={'size':14})
-    plt.setp(ax.get_xticklabels(), fontsize=12.)
-    plt.setp(ax.get_yticklabels(), fontsize=12.)
+    plt.setp(ax.get_xticklabels(), fontsize=14)
+    plt.setp(ax.get_yticklabels(), fontsize=14)
     if saving: plt.savefig('temperature.png', bbox_inches=0, dpi=fig.dpi)
     plt.show()
     return ans
@@ -175,11 +178,11 @@ def particles_5_2(saving = False):
             "(3,3,1)-state (e/4)",
             "Laughlin (e/2)"]
 
-    mp.mp.dps= 60    
+    mp.mp.dps= 60
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ans = []
-    for i in range(2,3):
+    for i in range(0,4):
         particle = genData.copy()
         particle.update(particleset[i])
         Qe = particle["Q"]
@@ -201,8 +204,9 @@ def particles_5_2(saving = False):
         ax.get_lines()[i].set_color('black')
         ax.get_lines()[i].set_dashes(dashstyle[i])            
         
-    ax.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$")
-    ax.set_xlabel(r'Volt [$\mu$V]')
+    ax.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$", fontsize=16)
+    ax.set_xlabel(r'Voltage [$\mu$V]', fontsize=16)
+    ax.xaxis.set_label_coords(.9, -0.06)
     ax.set_ybound([-.5, 1])
     ax.set_yticks([-0.25, 0, .25, .5, .75, 1])
     ax.set_yticklabels([-0.25, 0, 0.25, 0.5, 0.75, 1])
@@ -210,11 +214,11 @@ def particles_5_2(saving = False):
     xt_labels = [str(int(i * 10**6)) for i in xt]
     ax.set_xticks(xt)
     ax.set_xticklabels(xt_labels)
-    ax.set_title(r"Modulating function for $\nu = 5/2 $ candidates")
+    ax.set_title(r"Modulating function for $\nu = 5/2 $ candidates", fontsize=16)
     ax.legend(loc='upper right', prop={'size':14})
     ax.grid(True)    
-    plt.setp(ax.get_xticklabels(), fontsize=12.)
-    plt.setp(ax.get_yticklabels(), fontsize=12.)
+    plt.setp(ax.get_xticklabels(), fontsize=14)
+    plt.setp(ax.get_yticklabels(), fontsize=14)
     if saving: plt.savefig('particles_5_2.png', bbox_inches=0, dpi=fig.dpi)
     plt.show()
     return ans
@@ -265,7 +269,7 @@ def particles_7_3(saving = False):
         A = base_parameters(particle, V = Vpoints, Q = Qe, T = 1/mpf(10**3))
         
         B = Rfunc_constructor(A, method = 'series')
-        B.setParameter(nterms = 700, maxA = 12, maxK = 12)
+        B.setParameter(nterms = 600, maxA = 12, maxK = 12)
         B.genAnswer()
         ans.append(B)
         ax.plot(Vpoints, B.rrfunction, label = names[i], linewidth=1.5) 
@@ -276,8 +280,9 @@ def particles_7_3(saving = False):
         ax.get_lines()[i].set_color('black')
         ax.get_lines()[i].set_dashes(dashstyle[i]) 
 
-    ax.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$")
-    ax.set_xlabel(r'Volt [$\mu$V]')
+    ax.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$", fontsize=16)
+    ax.set_xlabel(r'Voltage [$\mu$V]', fontsize=16)
+    ax.xaxis.set_label_coords(.9, -0.06)
     ax.set_ybound([-.5, 1])
     ax.set_yticks([-0.25, 0, .25, .5, .75, 1])
     ax.set_yticklabels([-0.25, 0, 0.25, 0.5, 0.75, 1])
@@ -285,11 +290,11 @@ def particles_7_3(saving = False):
     xt_labels = [str(int(i * 10**6)) for i in xt]    
     ax.set_xticks(xt)
     ax.set_xticklabels(xt_labels)
-    ax.set_title(r"Modulating function for $\nu = 7/3 $ candidates")
+    ax.set_title(r"Modulating function for $\nu = 7/3 $ candidates", fontsize=16)
     ax.legend(loc='upper right', prop={'size':14})
     ax.grid(True)
-    plt.setp(ax.get_xticklabels(), fontsize=12.)
-    plt.setp(ax.get_yticklabels(), fontsize=12.)
+    plt.setp(ax.get_xticklabels(), fontsize=14)
+    plt.setp(ax.get_yticklabels(), fontsize=14)
     if saving: plt.savefig('particles_7_3.png', bbox_inches=0, dpi=fig.dpi)
     plt.show()
     return ans
@@ -352,15 +357,15 @@ def multi_modes(saving = False):
     ax.set_yticklabels([0,0.25, 0.5, 0.75, 1])
     ax.set_xticks(xt)
     ax.set_xticklabels([])
-    ax.legend(loc = 'upper right', prop={'size':12})
-    plt.setp(ax.get_xticklabels(), fontsize = 12.)
-    plt.setp(ax.get_yticklabels(), fontsize = 12.)    
+    ax.legend(loc = 'upper right', prop={'size':14})
+    plt.setp(ax.get_xticklabels(), fontsize = 14)
+    plt.setp(ax.get_yticklabels(), fontsize = 14)    
     ax.grid(True)
     ax2 = fig.add_subplot(212)
     ax2.plot(Vpoints, B.rrfunction, linewidth=1.5) 
     ax2.get_lines()[0].set_color('black')
-    ax2.set_title(r'Modulating function for edge with three modes')
-    ax2.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$")
+    ax2.set_title(r'Modulating function for edge with three modes', fontsize=16)
+    ax2.set_ylabel(r"$\mathrm{Re}[H_{ij}^{\mathrm{mod}}]{}$", fontsize=16)
     ax2.set_xlabel(r'Volt [$\mu$V]')
     ax2.set_yticks([-0.25,0,.25,.5,.75,1])
     ax2.set_yticklabels([-0.25,0,0.25,0.5,0.75,1])
@@ -372,3 +377,6 @@ def multi_modes(saving = False):
     if saving: plt.savefig('main_plot.png', bbox_inches=0, dpi=fig.dpi)
     plt.show()
     return B
+
+if __name__ == '__main__':
+    main_plot(saving= True)

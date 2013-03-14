@@ -44,8 +44,7 @@ def Rfunc_constructor(A, method = 'series'):
         raise ValueError
     return constr(parameters = A.parameters, g = A.g, gtot = A.gtot, T = A.T,
                                 maxParameter = A.maxParameter, prefac = A.prefac,
-                                V = A.V, scaledVolt = A.scaledVolt,
-                                distance = A.input_parameters["x"][0], Vq = A.Vq)
+                                V = A.V, scaledVolt = A.scaledVolt, Vq = A.Vq)
 
 
 def Current(rfunc):
