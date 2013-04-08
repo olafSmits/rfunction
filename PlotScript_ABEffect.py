@@ -198,10 +198,10 @@ def plot_AB((A,B), AB_Oscillations, distance, saving= False, middle_title_extra 
     plt.setp(ax3.get_xticklabels(), fontsize=14)
     if saving: 
         if middle_title_extra ==  r' (Optimistic)':
-            name = ' signal_edge_variation_opt.png'
+            name = ' signal_edge_variation_opt.pdf'
         elif middle_title_extra ==  r' (Pessimistic)':
-            name = ' signal_edge_variation_pess.png'
+            name = ' signal_edge_variation_pess.pdf'
         else:
-            name = ' signal_edge_variation.png'
-        plt.savefig( name, bbox_inches=0, dpi=fig.dpi)
+            name = ' signal_edge_variation.pdf'
+        plt.savefig( name, bbox_inches=0, dpi= 300)
     plt.show()    

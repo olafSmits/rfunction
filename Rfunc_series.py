@@ -21,6 +21,18 @@ fexp = vectorize(mp.exp)
 pi = mpf(mp.pi)
 
 class Rfunc_series(object):
+    """ 
+    The parent object of the implementation of the R function. 
+    
+    This object computes the R function. It uses a straightforward Taylor 
+    series-based approach to compute the Lauricella function, from which it
+    computes the R function.
+    
+    The R-function function is:
+        
+    R(gtot / 2 - i QeV/2T; {g_i} ; {z_i}) = 
+    
+    """
     nterms = 250
     parameters = EMP[:,newaxis]
     g = EMP[:,newaxis]
@@ -58,6 +70,8 @@ class Rfunc_series(object):
         self.prefac = self.prefac * np.power(self.maxParameter, 
                                   -self.scaledVolt[...,newaxis])
     def setParameter(self, nterms, **arg):
+        """ Used to set parameters, such as the number of terms in the series.
+        It's probably better to specify this using the initialization though."""
         self.nterms = nterms
     def genLDA(self):
         self.power = np.power(self.parameters[...,newaxis], 

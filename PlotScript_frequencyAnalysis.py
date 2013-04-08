@@ -250,7 +250,7 @@ def SpectrumPlot((A,B), display_frequencies = True, saving = False):
                         label = j,linestyle = k)
         ax.legend(loc='upper right', prop={'size':14})
     plt.subplots_adjust(hspace=0.4)
-    if saving: plt.savefig('ft_analysis_voltage.png', bbox_inches=0, dpi=fig.dpi)
+    if saving: plt.savefig('ft_analysis_voltage.pdf', bbox_inches=0, dpi=300)
     plt.show()
 
 
@@ -311,7 +311,7 @@ def Propagator_three_modes(saving = False):
     ax2.grid(True)
     plt.setp(ax2.get_xticklabels(), fontsize=12.)
     plt.setp(ax2.get_yticklabels(), fontsize=12.)        
-    if saving: plt.savefig('multi_mode_error.png', bbox_inches=0, dpi=fig.dpi)
+    if saving: plt.savefig('multi_mode_error.pdf', bbox_inches=0, dpi=300)
     plt.show()
     return B
 

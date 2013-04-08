@@ -169,6 +169,6 @@ def plotSpectrumDistance((A,B), display_frequencies = True, saving = False):
                         label = j,linestyle = k)
                         
         ax.legend(loc='upper right', prop={'size':14})  
-    if saving: plt.savefig('ft_analysis_edge_variation.png', bbox_inches=0, dpi=fig.dpi)
+    if saving: plt.savefig('ft_analysis_edge_variation.pdf', bbox_inches=0, dpi=300)
     plt.show
   

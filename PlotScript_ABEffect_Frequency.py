@@ -108,7 +108,7 @@ def plotMultiSpectrum((A,B), dist2, saving = False):
         if i == 3: 
             ax.set_xticklabels(xticks_labels)  
             ax.set_xlabel(r'Length of one edge [$\mu m$]', fontsize = 16)
-            ax.xaxis.set_label_coords(0.6, -0.22)
+            ax.xaxis.set_label_coords(0.6, -0.24)
         
         else: ax.set_xticklabels([])
         
@@ -146,9 +146,9 @@ def plotMultiSpectrum((A,B), dist2, saving = False):
         plt.axvline(AB_freq * 10**(5), color = 'black', linewidth = 1.5,
                     linestyle ='--', label = '$\phi_{AB}$')
         fv, fc = freqs[i]
-        plt.axvline(AB_freq * 10**(5) + fc, color = 'black', linewidth = 1.5,
-                    linestyle =':', label = '$\phi_{AB} + f_c$')
         plt.axvline(AB_freq * 10**(5) + fv, color = 'black', linewidth = 1.5,
+                    linestyle =':', label = '$\phi_{AB} + f_c$')
+        plt.axvline(AB_freq * 10**(5) + fc, color = 'black', linewidth = 1.5,
                     linestyle ='-.', label = '$\phi_{AB} + f_n$')
         if i ==0: 
             ax.legend(prop={'size':14})
@@ -162,7 +162,7 @@ def plotMultiSpectrum((A,B), dist2, saving = False):
         if i == 3: 
             ax.set_xticklabels(xticks_labels)
             ax.set_xlabel(r'Frequency [1/$\mu m$]', fontsize = 16)
-            ax.xaxis.set_label_coords(0.6, -0.22)
+            ax.xaxis.set_label_coords(0.6, -0.24)
         else: ax.set_xticklabels([])
         ax.yaxis.tick_right()        
         if i == 2:
@@ -176,7 +176,7 @@ def plotMultiSpectrum((A,B), dist2, saving = False):
         plt.setp(ax.get_xticklabels(), fontsize = 14)
         plt.setp(ax.get_yticklabels(), fontsize = 14)  
 
-    if saving: plt.savefig('interference_ab_fourier_progress.png', bbox_inches=0, dpi=fig.dpi)
+    if saving: plt.savefig('interference_ab_fourier_progress.pdf', bbox_inches=0, dpi=300)
     plt.subplots_adjust(wspace=0.05,hspace=0)
     plt.show()
         

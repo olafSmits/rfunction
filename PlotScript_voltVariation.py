@@ -80,7 +80,7 @@ def main_plot(saving = False):
     ax2.grid(True)
     plt.setp(ax2.get_xticklabels(), fontsize=14)
     plt.setp(ax2.get_yticklabels(), fontsize=14)        
-    if saving: plt.savefig('main_plot.png', bbox_inches=0, dpi=fig.dpi)
+    if saving: plt.savefig('main_plot.pdf', bbox_inches=0, dpi=300)
     plt.subplots_adjust(hspace=0.3)
     plt.show()
     return B
@@ -140,7 +140,7 @@ def temperature(saving = False):
     ax.legend(loc='upper right', prop={'size':14})
     plt.setp(ax.get_xticklabels(), fontsize=14)
     plt.setp(ax.get_yticklabels(), fontsize=14)
-    if saving: plt.savefig('temperature.png', bbox_inches=0, dpi=fig.dpi)
+    if saving: plt.savefig('temperature.pdf', bbox_inches=0, dpi=300)
     plt.show()
     return ans
 
@@ -219,7 +219,7 @@ def particles_5_2(saving = False):
     ax.grid(True)    
     plt.setp(ax.get_xticklabels(), fontsize=14)
     plt.setp(ax.get_yticklabels(), fontsize=14)
-    if saving: plt.savefig('particles_5_2.png', bbox_inches=0, dpi=fig.dpi)
+    if saving: plt.savefig('particles_5_2.pdf', bbox_inches=0, dpi=300)
     plt.show()
     return ans
 
@@ -295,7 +295,7 @@ def particles_7_3(saving = False):
     ax.grid(True)
     plt.setp(ax.get_xticklabels(), fontsize=14)
     plt.setp(ax.get_yticklabels(), fontsize=14)
-    if saving: plt.savefig('particles_7_3.png', bbox_inches=0, dpi=fig.dpi)
+    if saving: plt.savefig('particles_7_3.pdf', bbox_inches=0, dpi=300)
     plt.show()
     return ans
 #def plot_all(saveon = False):
@@ -374,7 +374,7 @@ def multi_modes(saving = False):
     ax2.grid(True)
     plt.setp(ax2.get_xticklabels(), fontsize=12.)
     plt.setp(ax2.get_yticklabels(), fontsize=12.)        
-    if saving: plt.savefig('main_plot.png', bbox_inches=0, dpi=fig.dpi)
+    if saving: plt.savefig('main_plot.pdf', bbox_inches=0, dpi=300)
     plt.show()
     return B
 
