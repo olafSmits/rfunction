@@ -26,15 +26,15 @@ def plotFigures(saveFigure = False):
     Also noted that time it took to compute each task, on a not-so-fast
     Vista laptop @ 2.2 GHz, 2 GB memory.
     """
-    #_ = plotInterferenceAndFourier(saving = saveFigure) # 19 minutes
-    #_ = plotDistanceEffectOnAB(saving = saveFigure) # 25 mins
-    A = plotFrequencySpectrumWhenChangingDistance(saving = saveFigure) # 57 mins
+    #_ = plotInterferenceAndFourier(saving = saveFigure) 
+    #_ = plotDistanceEffectOnAB(saving = saveFigure) 
+    A = plotFrequencySpectrumWhenChangingDistance(saving = saveFigure) 
 
-    #_ = main_plot(saving = saveFigure) # 1 min
-    #_ = temperature(saving = saveFigure) # 10.5 mins
-    #_ = particles_5_2(saving = saveFigure) # 7 mins
-    #_ = particles_7_3(saving = saveFigure) # 9 mins
-    #_ = plotFrequency(saving = saveFigure) # 1.5 min     
+    #_ = main_plot(saving = saveFigure) 
+    #_ = temperature(saving = saveFigure) 
+    #_ = particles_5_2(saving = saveFigure) 
+    #_ = particles_7_3(saving = saveFigure) 
+    #_ = plotFrequency(saving = saveFigure) 
 
     
     return A

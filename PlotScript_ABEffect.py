@@ -23,34 +23,34 @@ plt.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica'], 'size' : 14})
 plt.rc('text', usetex=True)
 
 #===============================================================================
-#   AB OSCILLATIONS --- OPTIMISTIC / PESSIMISTIC
+#   AB OSCILLATIONS --- WEAK / STRONG
 #===============================================================================
 
 
 def plotDistanceEffectOnAB(abelian = False, saving = False):
-    A,B, dis = distanceChangeParticleForAB(optimistic = True,\
+    A,B, dis = distanceChangeParticleForAB(strong_effect = True,\
                 abelian = abelian)
     plot_AB((A,B), ABOscillations(dis.size), dis, saving = saving,
-            middle_title_extra = r' (Optimistic)')
-    C,D, dis = distanceChangeParticleForAB(optimistic = False,\
+            middle_title_extra = r' (Strong)')
+    C,D, dis = distanceChangeParticleForAB(strong_effect = False,\
                 abelian = abelian)
     plot_AB((C, D), ABOscillations(dis.size), dis, saving = saving, 
-            middle_title_extra = r' (Pessimistic)')    
+            middle_title_extra = r' (Weak)')    
     return (A,B,dis), (C, D, dis)
 
-def distanceChangeParticleForAB(optimistic = True, abelian = False):
+def distanceChangeParticleForAB(strong_effect = True, abelian = False):
     """
     Computes modulating function as a function of changing the distance along
     one edge.
     
     Warning: this function can take very long to complete.
     """
-    assert isinstance(optimistic, bool)
+    assert isinstance(strong_effect, bool)
     Vpoints = np.array([mpf(50)/mpf(10**6)])
     Nterms= 201
     dist1 = np.array([mpf('2.5')/ mpf(10**(6))]*Nterms)
     
-    if optimistic:
+    if strong_effect:
         dist2 = np.linspace(mpf('2.0')/mpf(10**(6)), mpf('3.0')/mpf(10**(6)), Nterms)
     else:
         dist2 = np.linspace(mpf('2.25')/mpf(10**(6)), mpf('2.75')/mpf(10**(6)), 
@@ -62,7 +62,7 @@ def distanceChangeParticleForAB(optimistic = True, abelian = False):
         "x":[-dist1, dist2, -dist1, dist2]}
     Qe = 1/mpf(4)
 
-    if not optimistic:
+    if not strong_effect:
         genData["v"] = [mpf(i) * mpf(10**j) for (i,j) in [(8,3),(8,3),(3,3),(3,3)]]
     
     # Abelian case is not used in text    
@@ -71,7 +71,7 @@ def distanceChangeParticleForAB(optimistic = True, abelian = False):
         genData["c"] = [1,1]
         genData["g"] = [1/mpf(2), 1/mpf(2)]
         genData["x"] = [-dist1, dist2]
-        if optimistic:
+        if strong_effect:
             genData["v"] = [mpf(i) * mpf(10**j) for (i,j) in [(5,2),(5,2)]]
         else:
             genData["v"] = [mpf(i) * mpf(10**j) for (i,j) in [(5,3),(5,3)]]
@@ -197,9 +197,9 @@ def plot_AB((A,B), AB_Oscillations, distance, saving= False, middle_title_extra 
     plt.setp(ax2.get_xticklabels(), fontsize=14)
     plt.setp(ax3.get_xticklabels(), fontsize=14)
     if saving: 
-        if middle_title_extra ==  r' (Optimistic)':
+        if middle_title_extra ==  r' (Strong)':
             name = ' signal_edge_variation_opt.pdf'
-        elif middle_title_extra ==  r' (Pessimistic)':
+        elif middle_title_extra ==  r' (Weak)':
             name = ' signal_edge_variation_pess.pdf'
         else:
             name = ' signal_edge_variation.pdf'

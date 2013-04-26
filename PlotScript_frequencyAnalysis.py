@@ -43,16 +43,16 @@ def frequencyParticle(plotting = True):
     a "nice" parameter set.    
     """
     # Voltages array and distances.
-    Vpoints = mp.linspace(0, mpf('2.5')/mpf(10**4), 301)
-    dist1 = np.array(mpf('2.4')/ mpf(10**(6)))
-    dist2 = np.array(mpf('1.1')/mpf(10**(6)))
+    Vpoints = mp.linspace(0, mpf('1.')/mpf(10**4), 201)
+    dist1 = np.array(mpf('4.0')/ mpf(10**(6)))
+    dist2 = np.array(mpf('2.5')/mpf(10**(6)))
     
     # We did not have a particular anyon in mind -- frequency is
     # independent of the g-values anyway.
     particletype = { \
          "g":[mpf(1)/mpf(8), mpf(1)/mpf(8), mpf(1)/mpf(6), mpf(1)/mpf(6)], 
          "c":[1,1,1,1], 
-         "v":[mpf(i) * mpf(10**j) for (i,j) in [(5,3),(5,3),(1,3),(1,3)]],
+         "v":[mpf(i) * mpf(10**j) for (i,j) in [(3,3),(3,3),(9,2),(9,2)]],
          "x":[-dist1, dist2, -dist1, dist2],
          "Q":1/mpf(4)}
         
@@ -101,7 +101,7 @@ def frequencyParticle(plotting = True):
         for i in range(len(ax.get_lines())):
             ax.get_lines()[i].set_color('black')
             ax.get_lines()[i].set_dashes(dashstyle[i])
-        xt = np.linspace(0, 2 * 10**(-4), 5)
+        xt = np.linspace(0, 1 * 10**(-4), 5)
         xt_labels = [str(int(i * 10**6)) for i in xt]        
         ax.set_ylabel(r"H_mod")
         ax.set_xlabel(r'Volt')
@@ -148,7 +148,7 @@ def computeFrequencies(A):
                    r'$f_1$ = $e^*b/(vh$)']
         linestyle = ['-','--']
     else:
-        # Not implemented
+        # Not implemented for more components / channels
         labels = ['']*x.size
         linestyle = ['-']*x.size
         
@@ -205,7 +205,7 @@ def SpectrumPlot((A,B), display_frequencies = True, saving = False):
 
     ax1.set_title(r'Modulating function $(T = 0)$', fontsize=16)
 
-    xt = np.linspace(0, 2.5 * 10**(-4), 6)
+    xt = np.linspace(0, 1. * 10**(-4), 6)
     xt_labels = [str(int(i * 10**6)) for i in xt]    
     ax1.set_xticks(xt)
     ax1.set_xticklabels(xt_labels)    
