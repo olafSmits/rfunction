@@ -3,3 +3,6 @@
 
 #compiled fortran module
 *.pyd
+
+*.ini
+*.svg
